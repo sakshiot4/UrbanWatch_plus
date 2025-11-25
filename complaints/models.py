@@ -1,3 +1,50 @@
 from django.db import models
+from django.contrib.auth.models import User
+from users.models import Citizen
+from officers.models import Officer
+from contractors.models import Contractor
 
-# Create your models here.
+class Complaint(models.Model):
+    STATUS_CHOICES = [
+        ('reported', 'Reported'),
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('closed', 'Closed'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('water', 'Water Supply'),
+        ('road', 'Road & Infrastructure'),
+        ('electricity', 'Electricity'),
+        ('sanitation', 'Sanitation'),
+        ('other', 'Other'),
+    ]
+    
+    # Foreign Keys matching your schema
+    citizen = models.ForeignKey(Citizen, on_delete=models.CASCADE, related_name='complaints')
+    officer = models.ForeignKey(Officer, null=True, blank=True, 
+                    on_delete=models.SET_NULL, related_name='officer_assigned_complaints')
+    contractor = models.ForeignKey(Contractor, null=True, blank=True, 
+                    on_delete=models.SET_NULL, related_name='contractor_assigned_complaints')
+    
+    # Core fields from your schema
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES,
+                               default='reported')
+    location = models.CharField(max_length=255)
+    region = models.CharField(max_length=50, blank=True, null=True)
+    # Additional fields (not in schema but useful)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    proof_image = models.ImageField(upload_to='complaint_proofs/', null=True, blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} ({self.status})"

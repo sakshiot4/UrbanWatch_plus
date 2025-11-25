@@ -69,7 +69,7 @@ ROOT_URLCONF = 'urbanwatch.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -145,7 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #tailwind css settings
 TAILWIND_APP_NAME = 'theme'
 NPM_BIN_PATH = r'C:\Program Files\nodejs\npm.cmd'
-CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_ALLOWED_TEMPLATE_PACKS = ["tailwind"]
 CRISPY_TEMPLATE_PACK = "tailwind"
 
 #media files settings.

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Submit Complaint{% endblock %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto py-12 px-4">
+    
+    <div class="bg-white shadow-xl rounded-2xl p-8 border border-gray-200">
+
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">
+            Submit a Complaint
+        </h2>
+
+        <p class="text-gray-600 mb-6">
+            Please provide detailed information about the issue you're reporting. 
+            The more details you provide, the better we can address your complaint.
+        </p>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Title -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Title
+                </label>
+                <input 
+                    type="text" 
+                    name="{{ form.title.name }}" 
+                    value="{{ form.title.value|default_if_none:'' }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
+                    focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter complaint title"
+                >
+                {% if form.title.errors %}
+                <p class="text-red-600 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Description
+                </label>
+                <textarea 
+                    name="{{ form.description.name }}" 
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
+                    focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your complaint"
+                >{{ form.description.value|default_if_none:'' }}</textarea>
+                {% if form.description.errors %}
+                <p class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Category
+                </label>
+                <div class="relative">
+                    {{ form.category }}
+
+                </div>
+                {% if form.category.errors %}
+                <p class="text-red-600 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Location -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Location
+                </label>
+                <input 
+                    type="text"
+                    name="{{ form.location.name }}"
+                    value="{{ form.location.value|default_if_none:'' }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
+                    focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter location"
+                >
+                {% if form.location.errors %}
+                <p class="text-red-600 text-sm mt-1">{{ form.location.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!--Region-->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Region
+                </label>
+                <input 
+                    type="text"
+                    name="{{ form.region.name }}"
+                    value="{{ form.location.value|default_if_none:'' }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
+                    focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter location"
+                >
+                {% if form.location.errors %}
+                <p class="text-red-600 text-sm mt-1">{{ form.location.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Proof Image -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Proof Image
+                </label>
+                <input 
+                    type="file"
+                    name="{{ form.proof_image.name }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white 
+                    file:bg-gray-100 file:py-2 file:px-4 file:rounded file:border-0 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                {% if form.proof_image.errors %}
+                <p class="text-red-600 text-sm mt-1">{{ form.proof_image.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+                type="submit"
+                class="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold 
+                hover:bg-blue-700 transition duration-200"
+            >
+                Submit Complaint
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

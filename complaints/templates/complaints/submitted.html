@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Complaint Submitted{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-12">
+    <div class="card bg-base-100 shadow-lg p-8">
+        <h2 class="text-3xl font-bold text-success mb-4">Complaint Submitted!</h2>
+        <p class="mb-6 text-base">Thank you for reporting your issue. Our team will review and update the status shortly.</p>
+        <div class="flex gap-4 justify-center">
+            <a href="{% url 'complaints:my_complaints' %}" class="btn btn-primary">View My Complaints</a>
+            <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-ghost">Submit Another</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
