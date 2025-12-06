@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Work Details{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6">
+    <!-- Back Button -->
+    <a href="{% url 'contractors:contractor_dashboard' %}" class="btn btn-ghost btn-sm mb-4">← Back to Dashboard</a>
+    
+    <!-- Main Card -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <!-- Title & Status -->
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="card-title text-3xl">{{ complaint.title }}</h2>
+                    <p class="text-sm text-gray-600">ID: {{ complaint.id }}</p>
+                </div>
+                <span class="badge {% if complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% elif complaint.status == 'completed' %}badge-success{% else %}badge-neutral{% endif %} badge-lg">
+                    {{ complaint.get_status_display }}
+                </span>
+            </div>
+            
+            <!-- Category, Region, Location -->
+            <div class="divider"></div>
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Category</p>
+                    <p class="font-semibold">{{ complaint.get_category_display }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Region</p>
+                    <p class="font-semibold">{{ complaint.get_region_display }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Location</p>
+                    <p class="font-semibold">{{ complaint.location }}</p>
+                </div>
+            </div>
+            
+            <!-- Description -->
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Description</h3>
+                <p class="text-gray-700 leading-relaxed">{{ complaint.description }}</p>
+            </div>
+            
+            <!-- Proof Image (if exists) -->
+            {% if complaint.proof_image %}
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Proof Image</h3>
+                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow">
+            </div>
+            {% endif %}
+            
+            <!-- Citizen Details -->
+            <div class="divider"></div>
+            <div class="bg-base-200 p-4 rounded-lg mb-6">
+                <h3 class="font-semibold mb-2">Citizen Information</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-600">Name</p>
+                        <p class="font-semibold">{{ complaint.citizen.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Email</p>
+                        <p class="font-semibold">{{ complaint.citizen.user.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Phone</p>
+                        <p class="font-semibold">{{ complaint.citizen.phone|default:"Not provided" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Officer Details -->
+            <div class="divider"></div>
+            <div class="bg-base-200 p-4 rounded-lg mb-6">
+                <h3 class="font-semibold mb-2">Assigned Officer</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-600">Name</p>
+                        <p class="font-semibold">{{ complaint.officer.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Email</p>
+                        <p class="font-semibold">{{ complaint.officer.email }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timestamps -->
+            <div class="divider"></div>
+            <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                <div>
+                    <p class="text-gray-600">Submitted On</p>
+                    <p class="font-semibold">{{ complaint.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Last Updated</p>
+                    <p class="font-semibold">{{ complaint.updated_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+            
+            <!-- Status Update Section (only if active) -->
+            {% if status_form %}
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3">Update Work Status</h3>
+                <form method="post" action="{% url 'contractors:contractor_update_status' complaint.id %}" class="space-y-3">
+                    {% csrf_token %}
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Mark work as:</span>
+                        </label>
+                        {{ status_form.status }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Update Status
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="divider"></div>
+            <div class="alert alert-info">
+                <span>This work is {{ complaint.get_status_display|lower }}. No further updates available.</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

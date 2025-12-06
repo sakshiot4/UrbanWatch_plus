@@ -1,0 +1,24 @@
+[
+    {
+        "model": "auth.user",
+        "pk": 1001,
+        "fields": {
+            "username": "officer_demo",
+            "is_staff": true,
+            "is_superuser": false,
+            "is_active": true,
+            "password": "pbkdf2_sha256$320000$demo$hashedpassword"
+        }
+    },
+    {
+        "model": "officers.officer",
+        "pk": 2001,
+        "fields": {
+            "user": 1001,
+            "name": "Demo Officer North",
+            "email": "officer.demo@example.com",
+            "phone": "9999999999",
+            "region": "north"
+        }
+    }
+]

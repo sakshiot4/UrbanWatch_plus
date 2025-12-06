@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Complaint Details{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6">
+    <!-- Back Button -->
+    <a href="{% url 'officers:dashboard' %}" class="btn btn-ghost btn-sm mb-4">← Back to Dashboard</a>
+    
+    <!-- Main Card -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <!-- Title & Status -->
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="card-title text-3xl">{{ complaint.title }}</h2>
+                    <p class="text-sm text-gray-600">ID: {{ complaint.id }}</p>
+                </div>
+                <span class="badge {% if complaint.status == 'reported' %}badge-warning{% elif complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% elif complaint.status == 'completed' %}badge-success{% else %}badge-neutral{% endif %} badge-lg">
+                    {{ complaint.get_status_display }}
+                </span>
+            </div>
+            
+            <!-- Category, Region, Location -->
+            <div class="divider"></div>
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Category</p>
+                    <p class="font-semibold">{{ complaint.get_category_display }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Region</p>
+                    <p class="font-semibold">{{ complaint.get_region_display }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Location</p>
+                    <p class="font-semibold">{{ complaint.location }}</p>
+                </div>
+            </div>
+            
+            <!-- Description -->
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Description</h3>
+                <p class="text-gray-700 leading-relaxed">{{ complaint.description }}</p>
+            </div>
+            
+            <!-- Proof Image (if exists) -->
+            {% if complaint.proof_image %}
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Proof Image</h3>
+                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow">
+            </div>
+            {% endif %}
+            
+            <!-- Citizen Details -->
+            <div class="divider"></div>
+            <div class="bg-base-200 p-4 rounded-lg mb-6">
+                <h3 class="font-semibold mb-2">Citizen Information</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-600">Name</p>
+                        <p class="font-semibold">{{ complaint.citizen.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Email</p>
+                        <p class="font-semibold">{{ complaint.citizen.user.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Phone</p>
+                        <p class="font-semibold">{{ complaint.citizen.phone|default:"Not provided" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Region</p>
+                        <p class="font-semibold">{{ complaint.citizen.region|default:"Not specified" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timestamps -->
+            <div class="divider"></div>
+            <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                <div>
+                    <p class="text-gray-600">Submitted On</p>
+                    <p class="font-semibold">{{ complaint.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Last Updated</p>
+                    <p class="font-semibold">{{ complaint.updated_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+            
+            <!-- Status Update Section -->
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3">Update Status</h3>
+                <form method="post" action="{% url 'officers:update_status' complaint.id %}" class="space-y-3">
+                    {% csrf_token %}
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Change Status to:</span>
+                        </label>
+                        {{ status_form.status }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Update Status
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Contractor Assignment Section -->
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-3">Contractor Assignment</h3>
+                
+                {% if complaint.contractor %}
+                <div class="alert alert-info mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>
+                        Currently assigned to: <strong>{{ complaint.contractor.name }}</strong>
+                    </span>
+                </div>
+                {% else %}
+                <div class="alert alert-warning mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M8.228 7.228a8 8 0 1111.544 11.544m0 0l1.416 1.416"></path></svg>
+                    <span>No contractor assigned yet.</span>
+                </div>
+                {% endif %}
+                
+                <form method="post" action="{% url 'officers:assign_contractor' complaint.id %}" class="space-y-3">
+                    {% csrf_token %}
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Select Contractor:</span>
+                        </label>
+                        {{ contractor_form.contractor }}
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Save Contractor
+                        </button>
+                        <a href="{% url 'contractors:list_for_complaint' complaint.id %}" class="btn btn-outline btn-sm">
+                            Choose from List
+                        </a>
+                        {% if complaint.contractor %}
+                        <button type="submit" name="remove_contractor" class="btn btn-error btn-sm">
+                            Remove Contractor
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

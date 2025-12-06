@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Choose Contractor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6">
+    <!-- Back Button -->
+    <a href="{% url 'officers:complaint_detail' complaint.id %}" class="btn btn-ghost btn-sm mb-4">← Back to Complaint</a>
+    
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold mb-2">Choose Contractor</h2>
+        <p class="text-gray-600">
+            Complaint: <span class="font-semibold">{{ complaint.title }}</span>
+        </p>
+    </div>
+    
+    {% if contractors %}
+    <div class="grid gap-4">
+        {% for contractor in contractors %}
+        <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow">
+            <div class="card-body">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="card-title text-lg">{{ contractor.name }}</h3>
+                        
+                        <!-- Details Grid -->
+                        <div class="grid grid-cols-2 gap-4 mt-3 text-sm">
+                            <div>
+                                <p class="text-gray-600">Company</p>
+                                <p class="font-semibold">{{ contractor.company|default:"Not specified" }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Specialization</p>
+                                <p class="font-semibold">{{ contractor.specialization|default:"General" }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Email</p>
+                                <p class="font-semibold">{{ contractor.email }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Phone</p>
+                                <p class="font-semibold">{{ contractor.phone|default:"Not provided" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Select Button -->
+                    <a
+                        href="{% url 'officers:complaint_detail' complaint.id %}?contractor_id={{ contractor.id }}"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Select
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>No contractors available. Please add contractors first.</span>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -7,7 +7,9 @@ class ComplaintForm(forms.ModelForm):
         fields = ['title', 'description', 'category', 'location', 'region', 'proof_image']
         widgets = {
             'category': forms.Select(attrs={'class': 'select select-bordered w-1/2 bg-white border-gray-300'}),
+            'region': forms.Select(attrs={'class': 'select select-bordered w-1/2 bg-white border-gray-300'}),
        }
+        
         labels= {
                 'title': 'Complaint Title',
                 'description': 'Description',

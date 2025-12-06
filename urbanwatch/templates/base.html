@@ -1,0 +1,64 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UrbanWatch+{% endblock %}</title>
+    {% tailwind_css %}
+</head>
+<body class="min-h-screen bg-base-200">
+    <!-- Navbar -->
+    <div class="navbar bg-primary text-primary-content">
+        <div class="flex-1">
+            <a href="/" class="btn btn-ghost text-xl">UrbanWatch+</a>
+        </div>
+        <div class="flex-none gap-2">
+            {% if user.is_authenticated %}
+                {% if user.officer_profile %}
+                    <!-- Officer Links -->
+                    <a href="{% url 'officers:dashboard' %}" class="btn btn-sm">Officer Dashboard</a>
+                {% elif user.contractor_profile %}
+                    <!-- Contractor Links -->
+                    <a href="{% url 'contractors:dashboard' %}" class="btn btn-sm">Contractor Dashboard</a>
+                {% else %}
+                    <!-- Citizen Links -->
+                    <a href="{% url 'complaints:submit' %}" class="btn btn-sm">Submit Complaint</a>
+                    <a href="{% url 'complaints:my_complaints' %}" class="btn btn-sm btn-ghost">My Complaints</a>
+                {% endif %}
+            {% endif %}
+
+                
+                <!-- Logout Dropdown -->
+                <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="btn btn-ghost btn-circle avatar placeholder">
+                        <div class="bg-neutral-focus text-neutral-content rounded-full w-10">
+                            <span class="text-xl">{{ user.username|first|upper }}</span>
+                        </div>
+                    </label>
+                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 text-base-content">
+                        <li><span>{{ user.username }}</span></li>
+                        <li><a href="/admin/logout/">Logout</a></li>
+                    </ul>
+                </div>
+            {% else %}
+                <a href="/admin/login/" class="btn btn-sm">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mx-4 mt-4 shadow">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Content -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
