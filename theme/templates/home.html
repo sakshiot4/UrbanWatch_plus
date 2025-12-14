@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero min-h-[70vh] bg-base-200 rounded-box relative overflow-hidden">
+    <div class="hero-content flex-col lg:flex-row-reverse z-10">
+        <!-- Hero Image/Illustration -->
+        <img src="https://img.freepik.com/free-vector/city-skyline-concept-illustration_114360-8923.jpg" class="max-w-sm rounded-lg shadow-2xl lg:max-w-xl" alt="Urban City" />
+        
+        <!-- Text Content -->
+        <div class="lg:pr-10">
+            <h1 class="text-5xl font-bold leading-tight">
+                Building Better Cities, <br>
+                <span class="text-primary">Together.</span>
+            </h1>
+            <p class="py-6 text-lg text-gray-600">
+                UrbanWatch+ empowers citizens to report issues, track resolutions, and collaborate with city officials. 
+                Spot a pothole? Broken streetlight? We've got you covered.
+            </p>
+            
+            <div class="flex gap-4">
+                {% if user.is_authenticated %}
+                    {% if user.officer_profile %}
+                        <a href="{% url 'officers:dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+                    {% elif user.contractor_profile %}
+                        <a href="{% url 'contractors:contractor_dashboard' %}" class="btn btn-primary">View Contracts</a>
+                    {% else %}
+                        <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-primary">Report an Issue</a>
+                        <a href="{% url 'users:citizen_dashboard' %}" class="btn btn-outline btn-primary">Track My Complaints</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary">Get Started</a>
+                    <a href="{% url 'account_login' %}" class="btn btn-outline">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Background Decor (Optional Blob) -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-0"></div>
+    <div class="absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl -z-0"></div>
+</div>
+
+<!-- Features Section -->
+<div class="py-16">
+    <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold">How UrbanWatch+ Works</h2>
+        <p class="text-gray-500 mt-2">Simplify urban maintenance in 3 easy steps</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+        <!-- Feature 1 -->
+        <div class="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
+            <div class="card-body items-center text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4 text-2xl">
+                    📸
+                </div>
+                <h3 class="card-title">1. Snap & Report</h3>
+                <p>See an issue? Take a photo, add a location, and submit it instantly via our portal.</p>
+            </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
+            <div class="card-body items-center text-center">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 text-2xl">
+                    ⚡
+                </div>
+                <h3 class="card-title">2. Instant Assignment</h3>
+                <p>Our system automatically routes your complaint to the nearest available officer or contractor.</p>
+            </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
+            <div class="card-body items-center text-center">
+                <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 text-2xl">
+                    ✅
+                </div>
+                <h3 class="card-title">3. Track & Resolve</h3>
+                <p>Get real-time updates as your issue gets fixed. Receive a notification when it's done.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="bg-primary text-primary-content rounded-box py-12 px-8 mb-16 shadow-lg">
+    <div class="flex flex-col md:flex-row justify-around items-center text-center gap-8">
+        <div>
+            <div class="text-4xl font-black mb-2">500+</div>
+            <div class="opacity-80">Complaints Resolved</div>
+        </div>
+        <div>
+            <div class="text-4xl font-black mb-2">24h</div>
+            <div class="opacity-80">Avg. Response Time</div>
+        </div>
+         <div>
+            <div class="text-4xl font-black mb-2">98%</div>
+            <div class="opacity-80">Citizen Satisfaction</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}My Complaints{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold">My Complaints</h1>
+        <p class="text-sm text-gray-600 mt-2">
+            Track all your submitted complaints and their status
+        </p>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-3 gap-4 mb-8">
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <p class="text-sm text-gray-600">Total Complaints</p>
+                <p class="text-3xl font-bold">{{ total_count }}</p>
+            </div>
+        </div>
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <p class="text-sm text-gray-600">Pending</p>
+                <p class="text-3xl font-bold text-warning">{{ pending_count }}</p>
+            </div>
+        </div>
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <p class="text-sm text-gray-600">Completed</p>
+                <p class="text-3xl font-bold text-success">{{ completed_count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Submit New Button -->
+    <div class="mb-8">
+        <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-primary">
+            + Submit New Complaint
+        </a>
+    </div>
+    
+    <!-- Pending Complaints Section -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-4">Pending Complaints ({{ pending_count }})</h2>
+        
+        {% if pending_complaints %}
+            <div class="space-y-4">
+                {% for complaint in pending_complaints %}
+                <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                    <div class="card-body">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="card-title text-lg">{{ complaint.title }}</h3>
+                                <div class="flex gap-2 mt-2 flex-wrap">
+                                    <span class="badge badge-outline">{{ complaint.get_category_display }}</span>
+                                    <span class="badge {% if complaint.status == 'reported' %}badge-warning{% elif complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% endif %}">
+                                        {{ complaint.get_status_display }}
+                                    </span>
+                                    <span class="badge badge-ghost">{{ complaint.location }}</span>
+                                </div>
+                                <p class="mt-3 text-sm text-gray-700">{{ complaint.description|truncatewords:20 }}</p>
+                                
+                                <!-- Status Info -->
+                                <div class="mt-3 text-xs text-gray-600 space-y-1">
+                                    {% if complaint.officer %}
+                                    <p><strong>Officer:</strong> {{ complaint.officer.name }}</p>
+                                    {% else %}
+                                    <p><strong>Officer:</strong> Pending assignment</p>
+                                    {% endif %}
+                                    
+                                    {% if complaint.contractor %}
+                                    <p><strong>Contractor:</strong> {{ complaint.contractor.name }}</p>
+                                    {% endif %}
+                                    
+                                    <p><strong>Submitted:</strong> {{ complaint.created_at|date:"M d, Y H:i" }}</p>
+                                </div>
+                            </div>
+                            <a href="{% url 'users:complaint_status_detail' complaint.id %}" class="btn btn-ghost btn-sm whitespace-nowrap">
+                                View Status
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if pending_complaints.has_other_pages %}
+            <div class="join mt-6 flex justify-center">
+                {% if pending_complaints.has_previous %}
+                <a href="?page=1" class="join-item btn btn-sm">First</a>
+                <a href="?page={{ pending_complaints.previous_page_number }}" class="join-item btn btn-sm">Previous</a>
+                {% endif %}
+                
+                <button class="join-item btn btn-sm btn-active">Page {{ pending_complaints.number }}</button>
+                
+                {% if pending_complaints.has_next %}
+                <a href="?page={{ pending_complaints.next_page_number }}" class="join-item btn btn-sm">Next</a>
+                <a href="?page={{ pending_complaints.paginator.num_pages }}" class="join-item btn btn-sm">Last</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="alert alert-info">
+            <span>You haven't submitted any complaints yet. <a href="{% url 'complaints:submit_complaint' %}" class="link">Submit one now</a></span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Divider -->
+    <div class="divider"></div>
+    
+    <!-- Completed Complaints Section -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-4">Completed Complaints ({{ completed_count }})</h2>
+        
+        {% if completed_complaints %}
+            <div class="space-y-4">
+                {% for complaint in completed_complaints %}
+                <div class="card bg-base-100 shadow-md">
+                    <div class="card-body">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="card-title text-lg">{{ complaint.title }}</h3>
+                                <div class="flex gap-2 mt-2 flex-wrap">
+                                    <span class="badge badge-outline">{{ complaint.get_category_display }}</span>
+                                    <span class="badge {% if complaint.status == 'completed' %}badge-success{% elif complaint.status == 'closed' %}badge-neutral{% endif %}">
+                                        {{ complaint.get_status_display }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">
+                                    <strong>Officer:</strong> {{ complaint.officer.name }}
+                                </p>
+                                {% if complaint.contractor %}
+                                <p class="text-xs text-gray-600">
+                                    <strong>Contractor:</strong> {{ complaint.contractor.name }}
+                                </p>
+                                {% endif %}
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Completed: {{ complaint.updated_at|date:"M d, Y" }}
+                                </p>
+                            </div>
+                            <a href="{% url 'users:complaint_status_detail' complaint.id %}" class="btn btn-ghost btn-sm">
+                                View Timeline
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+        <div class="alert alert-info">
+            <span>No completed complaints yet.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

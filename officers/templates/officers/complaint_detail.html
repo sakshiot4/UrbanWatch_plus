@@ -151,6 +151,28 @@
                         {% endif %}
                     </div>
                 </form>
+
+                <!-- Close Complaint Section (only if completed, not closed) -->
+                {% if complaint.status == 'completed' %}
+                <div class="divider"></div>
+                <div class="alert alert-success">
+                    <p class="font-semibold">✓ Work Completed</p>
+                    <p class="text-sm mt-2">This complaint has been completed by the contractor. You can now close it to finalize.</p>
+                    
+                    <form method="post" action="{% url 'officers:close_complaint' complaint.id %}" class="mt-4">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm">
+                            Close Complaint
+                        </button>
+                    </form>
+                </div>
+                {% elif complaint.status == 'closed' %}
+                <div class="divider"></div>
+                <div class="alert alert-info">
+                    <span>✓ This complaint has been closed and finalized.</span>
+                </div>
+                {% endif %}
+
             </div>
         </div>
     </div>

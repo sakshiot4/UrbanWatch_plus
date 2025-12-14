@@ -10,4 +10,6 @@ urlpatterns = [
     path('complaint/<int:complaint_id>/', views.complaint_detail, name='complaint_detail'),
     path('complaint/<int:complaint_id>/update-status/', views.update_status, name='update_status'), 
     path('complaint/<int:complaint_id>/assign-contractor/', views.assign_contractor, name='assign_contractor'),
+    path('complaint/<int:complaint_id>/close/', views.close_complaint, name='close_complaint'),
+    path('approvals/', views.contractor_approvals, name = 'contractor_approvals'),
 ]

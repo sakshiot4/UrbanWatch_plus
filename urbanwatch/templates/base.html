@@ -20,15 +20,13 @@
                     <a href="{% url 'officers:dashboard' %}" class="btn btn-sm">Officer Dashboard</a>
                 {% elif user.contractor_profile %}
                     <!-- Contractor Links -->
-                    <a href="{% url 'contractors:dashboard' %}" class="btn btn-sm">Contractor Dashboard</a>
+                    <a href="{% url 'contractors:contractor_dashboard' %}" class="btn btn-sm">Contractor Dashboard</a>
                 {% else %}
                     <!-- Citizen Links -->
                     <a href="{% url 'complaints:submit' %}" class="btn btn-sm">Submit Complaint</a>
-                    <a href="{% url 'complaints:my_complaints' %}" class="btn btn-sm btn-ghost">My Complaints</a>
+                    <a href="{% url 'users:citizen_dashboard' %}" class="btn btn-sm btn-ghost">My Complaints</a>
                 {% endif %}
-            {% endif %}
 
-                
                 <!-- Logout Dropdown -->
                 <div class="dropdown dropdown-end">
                     <label tabindex="0" class="btn btn-ghost btn-circle avatar placeholder">
@@ -38,11 +36,11 @@
                     </label>
                     <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 text-base-content">
                         <li><span>{{ user.username }}</span></li>
-                        <li><a href="/admin/logout/">Logout</a></li>
+                        <li><a href="{% url 'account_logout' %}">Logout</a></li>
                     </ul>
                 </div>
             {% else %}
-                <a href="/admin/login/" class="btn btn-sm">Login</a>
+                <a href="{% url 'account_login' %}" class="btn btn-sm">Login</a>
             {% endif %}
         </div>
     </div>

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-base-200 py-8">
+  <div class="card w-full max-w-md shadow-xl bg-base-100">
+    <div class="card-body">
+      <h2 class="card-title text-2xl mb-2">Welcome back</h2>
+      <p class="text-sm text-gray-600 mb-6">
+        Sign in to access your dashboard.
+      </p>
+
+      {% if form.errors %}
+      <div class="alert alert-error mb-4">
+        <span>Invalid username or password. Please try again.</span>
+      </div>
+      {% endif %}
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Username</span>
+          </label>
+          <input
+            type="text"
+            name="login"
+            maxlength="150"
+            autofocus
+            required
+            class="input input-bordered w-full"
+            placeholder="Enter your username"
+          >
+        </div>
+
+        <!-- Password -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Password</span>
+          </label>
+          <input
+            type="password"
+            name="password"
+            required
+            class="input input-bordered w-full"
+            placeholder="Enter your password"
+          >
+        </div>
+
+        <!-- Remember me (optional) 
+        <div class="form-control">
+          <label class="cursor-pointer label justify-start gap-3">
+            <input type="checkbox" name="remember" class="checkbox checkbox-sm" />
+            <span class="label-text text-sm text-gray-600">Remember me on this device</span>
+          </label>
+        </div> -->
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary btn-block mt-4">
+          Login
+        </button>
+      </form>
+
+      <!-- Links -->
+      <div class="mt-6 space-y-2 pt-4 border-t border-gray-300">
+        <p class="text-sm text-center text-gray-600">
+          Don't have an account?
+        </p>
+
+        <div class="flex flex-col gap-2">
+          <a href="{% url 'account_signup' %}" class="btn btn-outline btn-block">
+            Sign up as Citizen
+          </a>
+          <a href="{% url 'accounts:contractor_signup' %}" class="btn btn-outline btn-block">
+            Sign up as Contractor
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

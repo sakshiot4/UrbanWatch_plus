@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Complaint Status{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6">
+    <!-- Back Button -->
+    <a href="{% url 'users:citizen_dashboard' %}" class="btn btn-ghost btn-sm mb-4">← Back to My Complaints</a>
+    
+    <!-- Main Card -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <!-- Title -->
+            <div class="mb-6">
+                <h2 class="card-title text-3xl">{{ complaint.title }}</h2>
+                <p class="text-sm text-gray-600">ID: {{ complaint.id }} | Region: {{ complaint.get_region_display }}</p>
+            </div>
+            
+            <!-- Current Status -->
+            <div class="divider"></div>
+            <div class="bg-base-200 p-4 rounded-lg mb-6">
+                <p class="text-xs text-gray-600 uppercase mb-2">Current Status</p>
+                <p class="text-2xl font-bold">
+                    <span class="badge {% if complaint.status == 'reported' %}badge-warning{% elif complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% elif complaint.status == 'completed' %}badge-success{% else %}badge-neutral{% endif %} badge-lg">
+                        {{ complaint.get_status_display }}
+                    </span>
+                </p>
+            </div>
+            
+            <!-- Description -->
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Description</h3>
+                <p class="text-gray-700">{{ complaint.description }}</p>
+            </div>
+            
+            <!-- Proof Image -->
+            {% if complaint.proof_image %}
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Proof Image</h3>
+                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow">
+            </div>
+            {% endif %}
+            
+            <!-- Officer & Contractor -->
+            <div class="divider"></div>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-base-200 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">Assigned Officer</h3>
+                    {% if complaint.officer %}
+                    <p class="font-semibold">{{ complaint.officer.name }}</p>
+                    <p class="text-xs text-gray-600">{{ complaint.officer.email }}</p>
+                    {% else %}
+                    <p class="text-gray-600 text-sm">Not assigned yet</p>
+                    {% endif %}
+                </div>
+                <div class="bg-base-200 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">Assigned Contractor</h3>
+                    {% if complaint.contractor %}
+                    <p class="font-semibold">{{ complaint.contractor.name }}</p>
+                    <p class="text-xs text-gray-600">{{ complaint.contractor.email }}</p>
+                    {% else %}
+                    <p class="text-gray-600 text-sm">Not assigned yet</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Timeline -->
+            <div class="divider"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-4">Progress Timeline</h3>
+                <div class="space-y-4">
+                    {% for step in timeline %}
+                    <div class="flex gap-4">
+                        <!-- Timeline Dot -->
+                        <div class="flex flex-col items-center">
+                            <div class="{% if step.completed %}badge badge-success{% else %}badge badge-outline{% endif %} w-10 h-10 flex items-center justify-center font-bold">
+                                {% if step.completed %}✓{% else %}○{% endif %}
+                            </div>
+                            {% if not forloop.last %}
+                            <div class="w-1 h-12 bg-gray-300 my-1"></div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Timeline Content -->
+                        <div class="flex-1 pb-4">
+                            <p class="font-semibold">{{ step.label }}</p>
+                            <p class="text-sm text-gray-700">{{ step.description }}</p>
+                            {% if step.date %}
+                            <p class="text-xs text-gray-500 mt-1">{{ step.date|date:"M d, Y H:i" }}</p>
+                            {% else %}
+                            <p class="text-xs text-gray-400 mt-1">⏳ Pending...</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

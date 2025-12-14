@@ -3,9 +3,13 @@
 {% block title %}Officer Dashboard{% endblock %}
 
 {% block content %}
+<!-- Header with Actions -->
 <div class="max-w-7xl mx-auto">
     <div class="mb-8">
         <h1 class="text-4xl font-bold">Officer Dashboard</h1>
+        <a href="{% url 'officers:contractor_approvals' %}" class="btn btn-warning gap-2">
+        👥 Manage Contractor Approvals
+    </a>
         <p class="text-sm text-gray-600 mt-2">
             Region: <span class="badge badge-primary">{{ officer_region }}</span>
         </p>

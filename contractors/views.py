@@ -1,14 +1,32 @@
+from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db import transaction #
 from django.contrib import messages
 from django.core.paginator import Paginator
+
 from officers.models import Officer
 from officers.forms import StatusUpdateForm #
+
 from complaints.models import Complaint
 
 from .models import Contractor
 from .forms import ContractorStatusUpdateForm
+
+@login_required
+def pending_approval(request):
+    """Show pending screen"""
+    return render(request, 'contractors/pending_approval.html')
+
+@login_required
+def application_rejected(request):
+    """Show rejected screen with reason"""
+    try:
+        contractor = request.user.contractor_profile
+        reason = contractor.rejection_reason
+    except:
+        reason = "No reason provided."
+    return render(request, 'contractors/rejected.html', {'reason': reason})
 
 @login_required
 def contractor_dashboard(request):
@@ -18,6 +36,13 @@ def contractor_dashboard(request):
     except Contractor.DoesNotExist:
         messages.error(request, "Contractor profile not found.")
         return redirect('home')
+    
+    #security check: Redirect if not apporval..
+    if contractor.status == 'pending':
+        return redirect('contractors:pending_approval')
+    
+    if contractor.status == 'rejected':
+        return redirect('contractors:application_rejected')
     
     #Active work : assigned or in_progress.
     active_complaints = Complaint.objects.filter(
@@ -109,6 +134,11 @@ def contractor_update_status(request, complaint_id):
             # Use current_status (before form), not complaint.status (which may change)
             if current_status == 'in_progress' and new_status == 'completed':
                 complaint.status = 'completed'
+
+                #set completed_at timesptamp if not already set.
+                if complaint.completed_at is None:
+                    complaint.completed_at = timezone.now()
+                    
                 complaint.save()
                 messages.success(request, "Work marked as completed. Officer will review and close.")
             else:

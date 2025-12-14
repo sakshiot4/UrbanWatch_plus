@@ -8,7 +8,8 @@
         <h2 class="text-3xl font-bold text-success mb-4">Complaint Submitted!</h2>
         <p class="mb-6 text-base">Thank you for reporting your issue. Our team will review and update the status shortly.</p>
         <div class="flex gap-4 justify-center">
-            <a href="{% url 'complaints:my_complaints' %}" class="btn btn-primary">View My Complaints</a>
+            <!--<a href="{% url 'complaints:my_complaints' %}" class="btn btn-primary">View My Complaints</a> -->
+            <a href={% url 'users:citizen_dashboard' %} class="btn btn-primary">Dashboard</a>
             <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-ghost">Submit Another</a>
         </div>
     </div>

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites', #required for allauth.
 
     #third party apps.
     'crispy_forms',
@@ -47,10 +48,17 @@ INSTALLED_APPS = [
     'theme',
 
     #my apps.
+    'accounts',
     'complaints',
     'users',
     'officers',
     'contractors',
+    
+
+    #allauth apps.
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
 
 ]
 
@@ -62,6 +70,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware', #allauth middleware.
+
 ]
 
 ROOT_URLCONF = 'urbanwatch.urls'
@@ -69,8 +79,8 @@ ROOT_URLCONF = 'urbanwatch.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'templates'], #for project wide templates.
+        'APP_DIRS': True, #this enables django to look in app/templates/
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
@@ -152,3 +162,24 @@ CRISPY_TEMPLATE_PACK = "tailwind"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+#Allauth settings.
+SITE_ID = 1
+
+LOGIN_URL = 'account_login'
+LOGOUT_REDIRECT_URL = 'account_login' #go back to login page after logout.
+LOGIN_REDIRECT_URL = '/' #Will be overriden by the adapter.
+ACCOUNT_SIGNUP_REDIRECT_URL = 'account_login' #citizen will go to login page after signup. 
+
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
+ACCOUNT_LOGOUT_ON_GET = True #logout immediatly without confrimation page(optional but smoother). 
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_UNIQUE_EMAIL = False
+#ACCOUNT_SIGNUP_EMAIL_REQUIRED = False
+
+#use custom signup form (CitizenSignupForm)
+ACCOUNT_FORMS = {
+    'signup': 'accounts.forms.CitizenSignupForm',
+}

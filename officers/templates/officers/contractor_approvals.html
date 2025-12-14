@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Contractor Approvals{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-4xl font-bold">Contractor Approvals</h1>
+            <p class="text-gray-600 mt-2">Manage pending contractor applications</p>
+        </div>
+        <a href="{% url 'officers:dashboard' %}" class="btn btn-ghost">← Back to Dashboard</a>
+    </div>
+
+    <!-- Messages -->
+  <!--  {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %} mb-4">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <!-- Pending List -->
+    {% if pending_contractors %}
+    <div class="grid gap-6">
+        {% for contractor in pending_contractors %}
+        <div class="card bg-base-100 shadow-xl border-2 border-warning">
+            <div class="card-body">
+                <!-- Header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="card-title text-2xl">{{ contractor.company_name }}</h2>
+                        <p class="text-gray-600">Applicant: <strong>{{ contractor.name }}</strong></p>
+                        <div class="badge badge-warning gap-2 mt-2">
+                            ⏳ Pending Approval
+                        </div>
+                    </div>
+                    <div class="text-right text-sm text-gray-500">
+                        <p>Applied: {{ contractor.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Details Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-base-200 p-4 rounded-lg">
+                        <p class="text-xs text-gray-600 uppercase font-bold">Email</p>
+                        <p class="font-mono text-sm mt-1">{{ contractor.email }}</p>
+                    </div>
+                    <div class="bg-base-200 p-4 rounded-lg">
+                        <p class="text-xs text-gray-600 uppercase font-bold">Phone</p>
+                        <p class="font-mono text-sm mt-1">{{ contractor.phone }}</p>
+                    </div>
+                    <div class="bg-base-200 p-4 rounded-lg">
+                        <p class="text-xs text-gray-600 uppercase font-bold">License Number</p>
+                        <p class="font-mono text-sm mt-1">{{ contractor.license_number }}</p>
+                    </div>
+                    <div class="bg-base-200 p-4 rounded-lg">
+                        <p class="text-xs text-gray-600 uppercase font-bold">Region</p>
+                        <p class="text-sm mt-1">{{ contractor.get_region_display }}</p>
+                    </div>
+                    <div class="bg-base-200 p-4 rounded-lg">
+                        <p class="text-xs text-gray-600 uppercase font-bold">Specialization</p>
+                        <p class="text-sm mt-1">{{ contractor.get_specialization_display }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card-actions justify-end gap-3 pt-4 border-t">
+                    <!-- Approve Form -->
+                    <form method="post" onsubmit="return confirm('Approve {{ contractor.company_name }}?');" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="contractor_id" value="{{ contractor.id }}">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-success text-white">
+                            ✓ Approve
+                        </button>
+                    </form>
+
+                    <!-- Reject Modal Trigger -->
+                    <label for="reject-modal-{{ contractor.id }}" class="btn btn-error text-white">
+                        ✕ Reject
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject Modal -->
+        <input type="checkbox" id="reject-modal-{{ contractor.id }}" class="modal-toggle" />
+        <div class="modal modal-bottom sm:modal-middle">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg text-error mb-4">Reject Contractor</h3>
+                <p class="mb-4">
+                    Are you sure you want to reject 
+                    <strong class="text-error">{{ contractor.company_name }}</strong>?
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="contractor_id" value="{{ contractor.id }}">
+                    <input type="hidden" name="action" value="reject">
+                    
+                    <div class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text font-bold">Reason for Rejection *</span>
+                        </label>
+                        <textarea 
+                            name="rejection_reason" 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="Explain why this contractor is being rejected..."
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <div class="modal-action">
+                        <label for="reject-modal-{{ contractor.id }}" class="btn">Cancel</label>
+                        <button type="submit" class="btn btn-error text-white">Confirm Rejection</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-success shadow-lg">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>No pending contractor approvals!</span>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

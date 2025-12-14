@@ -50,6 +50,11 @@ class Complaint(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    assigned_at = models.DateTimeField(null=True, blank=True)
+    in_progress_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
         ordering = ['-created_at']
