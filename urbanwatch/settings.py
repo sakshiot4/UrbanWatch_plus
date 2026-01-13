@@ -166,7 +166,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 SITE_ID = 1
 
 LOGIN_URL = 'account_login'
-LOGOUT_REDIRECT_URL = 'account_login' #go back to login page after logout.
+LOGOUT_REDIRECT_URL = '/' #go back to login page after logout.
 LOGIN_REDIRECT_URL = '/' #Will be overriden by the adapter.
 ACCOUNT_SIGNUP_REDIRECT_URL = 'account_login' #citizen will go to login page after signup. 
 
