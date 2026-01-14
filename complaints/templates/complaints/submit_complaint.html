@@ -71,7 +71,7 @@
             </div>
 
             <!-- Location -->
-            <div>
+           <!-- <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">
                     Location
                 </label>
@@ -86,10 +86,10 @@
                 {% if form.location.errors %}
                 <p class="text-red-600 text-sm mt-1">{{ form.location.errors.0 }}</p>
                 {% endif %}
-            </div>
+            </div> -->
 
             <!--Region-->
-            <div>
+            <!-- <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">
                     Region
                 </label>
@@ -100,7 +100,7 @@
                 {% if form.region.errors %}
                 <p class="text-red-600 text-sm mt-1">{{ form.region.errors.0 }}</p>
                 {% endif %}
-            </div>
+            </div> -->
 
             <!-- Proof Image -->
             <div>
@@ -118,6 +118,27 @@
                 <p class="text-red-600 text-sm mt-1">{{ form.proof_image.errors.0 }}</p>
                 {% endif %}
             </div>
+            
+            <!-- Location -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-bold mb-2">Pinpoint Location (Drag marker to adjust)</label>
+            
+                <div id="map" class="h-80 w-full rounded-lg border-2 border-gray-300 z-0"></div>
+            
+                <button type="button" onclick="getLocation()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
+                    📍 Use My Current Location
+                </button>
+            
+                <p class="mt-2 text-sm text-gray-600">Selected Address: <span id="address_display" class="font-semibold">Mumbai (Default)</span></p>
+                <p class="mt-1 text-sm text-gray-600">
+                Pincode: <span id="pincode_display" class="font-semibold">—</span>
+</p>
+            </div>
+
+            <input type="hidden" name="latitude" id="id_latitude">
+            <input type="hidden" name="longitude" id="id_longitude">
+            <input type="hidden" name="pincode" id="id_pincode">
+            <input type="hidden" name="location" id="id_location">
 
             <!-- Submit Button -->
             <button 
@@ -132,5 +153,95 @@
 
     </div>
 </div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+
+<script>
+    var mumbaiCenter = [19.0760, 72.8777];
+    var map = L.map('map').setView(mumbaiCenter, 12);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var marker;
+
+    // Function to update hidden inputs and UI
+    function updateLocationData(lat, lng) {
+        document.getElementById('id_latitude').value = lat;
+        document.getElementById('id_longitude').value = lng;
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(response => response.json())
+            .then(data => {
+                if(data && data.address) {
+                    let fullAddress = data.display_name;
+                    let pincode = data.address.postcode || "Unknown";
+
+                    document.getElementById('address_display').innerText = fullAddress;
+                    document.getElementById('pincode_display').innerText = pincode;
+                    
+                    document.getElementById('id_location').value = fullAddress;
+                    document.getElementById('id_pincode').value = pincode;
+                }
+            });
+    }
+
+    // --- FIX 1: Search Bar Integration ---
+    var geocoder = L.Control.geocoder({
+        defaultMarkGeocode: false,
+        placeholder: "Search area in Mumbai..."
+    })
+    .on('markgeocode', function(e) {
+        var center = e.geocode.center;
+        map.setView(center, 16); // Zoom in to searched area
+        
+        if (marker) {
+            marker.setLatLng(center);
+        } else {
+            createMarker(center);
+        }
+        // This line ensures the search updates your Django fields!
+        updateLocationData(center.lat, center.lng); 
+    })
+    .addTo(map);
+
+    // Helper to create the marker and add the drag event
+    function createMarker(latlng) {
+        marker = L.marker(latlng, {draggable: true}).addTo(map);
+        
+        // --- FIX 2: Drag End Event ---
+        marker.on('dragend', function(event) {
+            var pos = marker.getLatLng();
+            updateLocationData(pos.lat, pos.lng);
+        });
+    }
+
+    // --- FIX 3: Click Event ---
+    map.on('click', function(e) {
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            createMarker(e.latlng);
+        }
+        updateLocationData(e.latlng.lat, e.latlng.lng);
+    });
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                map.setView([lat, lng], 16);
+                if (marker) marker.setLatLng([lat, lng]);
+                else createMarker([lat, lng]);
+                updateLocationData(lat, lng);
+            });
+        }
+    }
+</script>
 
 {% endblock %}

@@ -4,93 +4,101 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto py-6">
-    <!-- Back Button -->
     <a href="{% url 'users:citizen_dashboard' %}" class="btn btn-ghost btn-sm mb-4">← Back to My Complaints</a>
     
-    <!-- Main Card -->
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-            <!-- Title -->
-            <div class="mb-6">
-                <h2 class="card-title text-3xl">{{ complaint.title }}</h2>
-                <p class="text-sm text-gray-600">ID: {{ complaint.id }} | Region: {{ complaint.get_region_display }}</p>
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="card-title text-3xl mb-1">{{ complaint.title }}</h2>
+                    <p class="text-sm text-gray-500">
+                        Complaint ID: #{{ complaint.id }} <span class="mx-2">•</span> 
+                        <span class="font-semibold">Region: {{ complaint.get_region_display }}</span>
+                    </p>
+                </div>
+                <div class="badge {% if complaint.status == 'reported' %}badge-warning{% elif complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% elif complaint.status == 'completed' %}badge-success{% else %}badge-neutral{% endif %} badge-lg p-4">
+                    {{ complaint.get_status_display }}
+                </div>
             </div>
             
-            <!-- Current Status -->
-            <div class="divider"></div>
-            <div class="bg-base-200 p-4 rounded-lg mb-6">
-                <p class="text-xs text-gray-600 uppercase mb-2">Current Status</p>
-                <p class="text-2xl font-bold">
-                    <span class="badge {% if complaint.status == 'reported' %}badge-warning{% elif complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% elif complaint.status == 'completed' %}badge-success{% else %}badge-neutral{% endif %} badge-lg">
-                        {{ complaint.get_status_display }}
-                    </span>
-                </p>
-            </div>
-            
-            <!-- Description -->
-            <div class="divider"></div>
-            <div class="mb-6">
-                <h3 class="font-semibold mb-2">Description</h3>
+            <div class="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-100">
+                <h3 class="font-bold text-gray-700 mb-2">Description</h3>
                 <p class="text-gray-700">{{ complaint.description }}</p>
             </div>
+
+            <div class="divider">Location Details</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-1 space-y-3">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Address</p>
+                        <p class="text-sm">{{ complaint.location|default:"Address not available" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Pincode</p>
+                        <p class="text-sm badge badge-ghost">{{ complaint.pincode|default:"N/A" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">GPS Coordinates</p>
+                        <p class="text-xs font-mono text-gray-600">{{ complaint.latitude|floatformat:4 }}, {{ complaint.longitude|floatformat:4 }}</p>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <div id="detail-map" class="h-64 w-full rounded-lg border border-gray-300 z-0 shadow-inner"></div>
+                </div>
+            </div>
             
-            <!-- Proof Image -->
             {% if complaint.proof_image %}
-            <div class="divider"></div>
+            <div class="divider">Proof of Work</div>
             <div class="mb-6">
-                <h3 class="font-semibold mb-2">Proof Image</h3>
-                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow">
+                <h3 class="font-semibold mb-2">Uploaded Image</h3>
+                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow-md border hover:scale-105 transition-transform duration-200">
             </div>
             {% endif %}
             
-            <!-- Officer & Contractor -->
-            <div class="divider"></div>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-base-200 p-4 rounded-lg">
-                    <h3 class="font-semibold mb-2">Assigned Officer</h3>
+            <div class="divider">Assigned Team</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-base-200 p-4 rounded-lg border border-base-300">
+                    <h3 class="font-bold text-gray-700 mb-1">👮 Assigned Officer</h3>
                     {% if complaint.officer %}
-                    <p class="font-semibold">{{ complaint.officer.name }}</p>
-                    <p class="text-xs text-gray-600">{{ complaint.officer.email }}</p>
+                    <p class="text-lg">{{ complaint.officer.name }}</p>
+                    <p class="text-xs text-gray-500">{{ complaint.officer.email }}</p>
                     {% else %}
-                    <p class="text-gray-600 text-sm">Not assigned yet</p>
+                    <p class="text-gray-500 italic text-sm">Pending Assignment</p>
                     {% endif %}
                 </div>
-                <div class="bg-base-200 p-4 rounded-lg">
-                    <h3 class="font-semibold mb-2">Assigned Contractor</h3>
+                <div class="bg-base-200 p-4 rounded-lg border border-base-300">
+                    <h3 class="font-bold text-gray-700 mb-1">👷 Assigned Contractor</h3>
                     {% if complaint.contractor %}
-                    <p class="font-semibold">{{ complaint.contractor.name }}</p>
-                    <p class="text-xs text-gray-600">{{ complaint.contractor.email }}</p>
+                    <p class="text-lg">{{ complaint.contractor.name }}</p>
+                    <p class="text-xs text-gray-500">{{ complaint.contractor.email }}</p>
                     {% else %}
-                    <p class="text-gray-600 text-sm">Not assigned yet</p>
+                    <p class="text-gray-500 italic text-sm">Pending Assignment</p>
                     {% endif %}
                 </div>
             </div>
             
-            <!-- Timeline -->
-            <div class="divider"></div>
-            <div class="mb-6">
-                <h3 class="font-semibold mb-4">Progress Timeline</h3>
+            <div class="divider">History</div>
+            <div class="mb-6 pl-4">
                 <div class="space-y-4">
                     {% for step in timeline %}
                     <div class="flex gap-4">
-                        <!-- Timeline Dot -->
                         <div class="flex flex-col items-center">
-                            <div class="{% if step.completed %}badge badge-success{% else %}badge badge-outline{% endif %} w-10 h-10 flex items-center justify-center font-bold">
-                                {% if step.completed %}✓{% else %}○{% endif %}
+                            <div class="{% if step.completed %}badge badge-success text-white{% else %}badge badge-ghost border-gray-400{% endif %} w-8 h-8 flex items-center justify-center rounded-full font-bold z-10">
+                                {% if step.completed %}✓{% else %}●{% endif %}
                             </div>
                             {% if not forloop.last %}
-                            <div class="w-1 h-12 bg-gray-300 my-1"></div>
+                            <div class="w-0.5 h-full bg-gray-200 -my-1"></div>
                             {% endif %}
                         </div>
                         
-                        <!-- Timeline Content -->
-                        <div class="flex-1 pb-4">
-                            <p class="font-semibold">{{ step.label }}</p>
-                            <p class="text-sm text-gray-700">{{ step.description }}</p>
+                        <div class="flex-1 pb-6">
+                            <p class="font-bold text-gray-800">{{ step.label }}</p>
+                            <p class="text-sm text-gray-600">{{ step.description }}</p>
                             {% if step.date %}
-                            <p class="text-xs text-gray-500 mt-1">{{ step.date|date:"M d, Y H:i" }}</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ step.date|date:"M d, Y • h:i A" }}</p>
                             {% else %}
-                            <p class="text-xs text-gray-400 mt-1">⏳ Pending...</p>
+                            <p class="text-xs text-gray-400 mt-1 italic">Pending...</p>
                             {% endif %}
                         </div>
                     </div>
@@ -100,4 +108,33 @@
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Get coordinates from Django template
+        var lat = "{{ complaint.latitude|default:'null' }}";
+        var lng = "{{ complaint.longitude|default:'null' }}";
+
+        if (lat !== 'null' && lng !== 'null') {
+            // Initialize map
+            var map = L.map('detail-map').setView([lat, lng], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // Add marker (Not draggable, just showing location)
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup("<b>Issue Reported Here</b>")
+                .openPopup();
+        } else {
+            // Fallback if no location data
+            document.getElementById('detail-map').innerHTML = 
+                '<div class="flex items-center justify-center h-full bg-gray-100 text-gray-500">No location map available</div>';
+        }
+    });
+</script>
 {% endblock %}

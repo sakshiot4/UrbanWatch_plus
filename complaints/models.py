@@ -41,8 +41,11 @@ class Complaint(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=50, choices=STATUS_CHOICES,
                                default='reported')
-    location = models.CharField(max_length=255)
-    region = models.CharField(max_length=50, choices=REGION_CHOICE, default='central')
+    location = models.CharField(max_length=255, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    pincode = models.CharField(max_length=6, null=True, blank=True)
+    region = models.CharField(max_length=50, choices=REGION_CHOICE)
     # Additional fields (not in schema but useful)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     proof_image = models.ImageField(upload_to='complaint_proofs/', null=True, blank=True)
