@@ -4,6 +4,8 @@ from users.models import Citizen
 from officers.models import Officer
 from contractors.models import Contractor
 
+import uuid
+
 class Complaint(models.Model):
     STATUS_CHOICES = [
         ('reported', 'Reported'),
@@ -49,6 +51,7 @@ class Complaint(models.Model):
     # Additional fields (not in schema but useful)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     proof_image = models.ImageField(upload_to='complaint_proofs/', null=True, blank=True)
+    tracking_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

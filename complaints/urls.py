@@ -9,4 +9,5 @@ urlpatterns = [
     path('my_complaints/', views.my_complaints, name='my_complaints'),
     path('submitted/', TemplateView.as_view(
         template_name='complaints/submitted.html'), name='submit_success'),
+    path("track/", views.track_issue, name="track_issue"),
 ]

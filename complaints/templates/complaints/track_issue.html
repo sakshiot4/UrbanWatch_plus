@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Track Issue - UrbanWatch+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-12 px-4">
+
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-black mb-2 text-primary">Track Your Report</h1>
+        <p class="text-gray-500">Enter your unique tracking token to see real-time updates.</p>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl mb-8 border border-base-200">
+        <div class="card-body">
+            <form method="GET" class="join w-full">
+                <input
+                    type="text"
+                    name="token"
+                    value="{{ token }}"
+                    placeholder="Paste Tracking ID (UUID) here..."
+                    class="input input-bordered join-item w-full font-mono text-sm"
+                    required
+                />
+                <button type="submit" class="btn btn-primary join-item">Track</button>
+            </form>
+        </div>
+    </div>
+
+    {% if complaint %}
+    <div class="card bg-base-100 shadow-xl border-t-8 border-primary animate-in fade-in duration-500">
+        <div class="card-body">
+
+            <div class="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
+                <div>
+                    <h2 class="card-title text-3xl mb-1">{{ complaint.title }}</h2>
+                    <div class="text-sm text-gray-500 flex flex-col gap-1">
+                        <span class="font-mono bg-base-200 px-2 py-1 rounded w-fit">
+                            Token: {{ complaint.tracking_token }}
+                        </span>
+                        <span class="font-semibold">
+                            Region: {{ complaint.get_region_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="badge
+                    {% if complaint.status == 'reported' %}badge-warning
+                    {% elif complaint.status == 'assigned' %}badge-warning
+                    {% elif complaint.status == 'in_progress' %}badge-info
+                    {% elif complaint.status == 'completed' %}badge-success
+                    {% else %}badge-neutral{% endif %}
+                    badge-lg p-4">
+                    {{ complaint.get_status_display }}
+                </div>
+            </div>
+
+            {% if complaint.proof_image %}
+            <div class="divider">Proof</div>
+            <div class="mb-6">
+                <img
+                    src="{{ complaint.proof_image.url }}"
+                    alt="Proof Image"
+                    class="max-w-sm rounded-lg shadow-md border"
+                />
+            </div>
+            {% endif %}
+
+            <div class="bg-base-200 p-4 rounded-lg mb-6 border border-base-300">
+                <h3 class="font-bold text-gray-700 mb-2">Description</h3>
+                <p class="text-gray-700">{{ complaint.description }}</p>
+            </div>
+
+            <div class="divider">Location Details</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Address</p>
+                        <p class="text-sm">
+                            {{ complaint.location|default:"Address not available" }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Pincode</p>
+                        <p class="text-sm badge badge-ghost">
+                            {{ complaint.pincode|default:"N/A" }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">GPS Coordinates</p>
+                        <p class="text-xs font-mono text-gray-600">
+                            {% if complaint.latitude and complaint.longitude %}
+                                {{ complaint.latitude|floatformat:4 }},
+                                {{ complaint.longitude|floatformat:4 }}
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider">Assigned Team</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-base-200 p-4 rounded-lg border border-base-300">
+                    <h3 class="font-bold text-gray-700 mb-1">👮 Assigned Officer</h3>
+                    {% if complaint.officer %}
+                        <p class="text-lg">{{ complaint.officer.name }}</p>
+                    {% else %}
+                        <p class="text-gray-500 italic text-sm">Pending Assignment</p>
+                    {% endif %}
+                </div>
+
+                <div class="bg-base-200 p-4 rounded-lg border border-base-300">
+                    <h3 class="font-bold text-gray-700 mb-1">👷 Assigned Contractor</h3>
+                    {% if complaint.contractor %}
+                        <p class="text-lg">{{ complaint.contractor.name }}</p>
+                    {% else %}
+                        <p class="text-gray-500 italic text-sm">Pending Assignment</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="divider">History</div>
+            <div class="pl-4">
+                <div class="space-y-4">
+                    {% for step in timeline %}
+                    <div class="flex gap-4">
+                        <div class="flex flex-col items-center">
+                            <div class="{% if step.completed %}badge badge-success{% else %}badge badge-ghost{% endif %}
+                                w-8 h-8 flex items-center justify-center rounded-full font-bold">
+                                {% if step.completed %}✓{% else %}●{% endif %}
+                            </div>
+                            {% if not forloop.last %}
+                            <div class="w-0.5 h-full bg-gray-200"></div>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex-1 pb-6">
+                            <p class="font-bold text-gray-800">{{ step.label }}</p>
+                            {% if step.completed %}
+                                <p class="text-sm text-gray-600">{{ step.description }}</p>
+                                {% if step.date %}
+                                <p class="text-xs text-primary font-bold mt-1">
+                                    {{ step.date|date:"M d, Y • h:i A" }}
+                                </p>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-xs text-gray-400 italic">Pending…</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+
+from complaints.models import Complaint
 from .forms import ComplaintForm
 from django.contrib import messages
 from users.models import Citizen
@@ -44,7 +46,8 @@ def submit_complaint(request): #this form allows citizens to submit complaints
             complaint.status = 'reported'   #set initial status.
             complaint.save() #save complaint to DB.
            
-            messages.success(request, 'Your complaint has been submitted successfully.')
+            # Inside submit_complaint view, after complaint.save()
+            messages.success(request, f'Complaint Submitted! Your Tracking ID is: {complaint.tracking_token}')
             print("✅ Form is valid! Redirecting...")
             return redirect('complaints:submit_success')  #redirect to citizen's complaints page
         else:
@@ -71,3 +74,31 @@ def my_complaints(request):
     }
 
     return render(request, 'complaints/my_complaints.html', context)
+
+def track_issue(request):
+    """Public view to track a complaint using a UUID token."""
+    token = request.GET.get('token', '').strip()
+    complaint = None
+    timeline = []
+
+    if token:
+        try:
+            # Search for the complaint using the UUID
+            complaint = Complaint.objects.get(tracking_token=token)
+            
+            # Build the timeline (Same logic as dashboard)
+            timeline = [
+                {'label': 'Submitted', 'date': complaint.created_at, 'completed': True, 'desc': 'Complaint received.'},
+                {'label': 'Assigned', 'date': complaint.assigned_at, 'completed': bool(complaint.assigned_at), 'desc': 'Officer assigned.'},
+                {'label': 'In Progress', 'date': complaint.in_progress_at, 'completed': bool(complaint.in_progress_at), 'desc': 'Contractor working.'},
+                {'label': 'Completed', 'date': complaint.completed_at, 'completed': bool(complaint.completed_at), 'desc': 'Work finished.'},
+                {'label': 'Closed', 'date': complaint.closed_at, 'completed': bool(complaint.closed_at), 'desc': 'Verified & Closed.'},
+            ]
+        except (Complaint.DoesNotExist, ValueError):
+            messages.error(request, "Invalid Tracking ID. Please check and try again.")
+
+    return render(request, 'complaints/track_issue.html', {
+        'complaint': complaint,
+        'token': token,
+        'timeline': timeline
+    })
