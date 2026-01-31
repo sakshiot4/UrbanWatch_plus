@@ -6,9 +6,11 @@ class ContractorStatusUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Complaint
-        fields = ['status']
+        fields = ['status', 'completion_image']
         widgets = {
-            'status': forms.Select(attrs={'class': 'select select-bordered w-full'})
+            'status': forms.Select(attrs={'class': 'select select-bordered w-full'}),
+            #add styling to file input.
+            'completion_image': forms.FileInput(attrs={'class': 'file-input file-input-bordered w-full'})
         }
 
     def __init__(self, *args, **kwargs):

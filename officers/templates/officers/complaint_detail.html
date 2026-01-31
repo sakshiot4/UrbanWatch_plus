@@ -45,15 +45,41 @@
                 <p class="text-gray-700 leading-relaxed">{{ complaint.description }}</p>
             </div>
             
-            <!-- Proof Image (if exists) -->
-            {% if complaint.proof_image %}
-            <div class="divider"></div>
-            <div class="mb-6">
-                <h3 class="font-semibold mb-2">Proof Image</h3>
-                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow">
-            </div>
-            {% endif %}
-            
+            <!-- Proof Image (if exists) and Work Validition -->
+            <div class="divider">Work Verification</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="card bg-base-100 shadow border border-base-200">
+                        <figure class="px-4 pt-4">
+                            {% if complaint.proof_image %}
+                                <img src="{{ complaint.proof_image.url }}" alt="Before" class="rounded-xl h-64 object-cover w-full">
+                            {% else %}
+                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">No Image</div>
+                            {% endif %}
+                        </figure>
+                        <div class="card-body p-4 text-center">
+                            <h3 class="font-bold text-gray-500">BEFORE (Reported)</h3>
+                        </div>
+                    </div>
+
+                    <div class="card bg-base-100 shadow border {% if complaint.status == 'completed' %}border-success{% else %}border-base-200{% endif %}">
+                        <figure class="px-4 pt-4">
+                            {% if complaint.completion_image %}
+                                <img src="{{ complaint.completion_image.url }}" alt="After" class="rounded-xl h-64 object-cover w-full">
+                            {% else %}
+                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">
+                                    Pending Upload
+                                </div>
+                            {% endif %}
+                        </figure>
+                        <div class="card-body p-4 text-center">
+                            <h3 class="font-bold {% if complaint.status == 'completed' %}text-success{% else %}text-gray-500{% endif %}">
+                                AFTER (Proof)
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                            
             <!-- Citizen Details -->
             <div class="divider"></div>
             <div class="bg-base-200 p-4 rounded-lg mb-6">
@@ -154,24 +180,39 @@
 
                 <!-- Close Complaint Section (only if completed, not closed) -->
                 {% if complaint.status == 'completed' %}
-                <div class="divider"></div>
-                <div class="alert alert-success">
-                    <p class="font-semibold">✓ Work Completed</p>
-                    <p class="text-sm mt-2">This complaint has been completed by the contractor. You can now close it to finalize.</p>
-                    
-                    <form method="post" action="{% url 'officers:close_complaint' complaint.id %}" class="mt-4">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success btn-sm">
-                            Close Complaint
-                        </button>
-                    </form>
-                </div>
-                {% elif complaint.status == 'closed' %}
-                <div class="divider"></div>
-                <div class="alert alert-info">
-                    <span>✓ This complaint has been closed and finalized.</span>
-                </div>
-                {% endif %}
+                    <div class="alert alert-info shadow-lg mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>
+                            <h3 class="font-bold">Contractor has marked this as Completed!</h3>
+                            <div class="text-xs">Please review the "After" photo above.</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <label for="reject-work-modal" class="btn btn-sm btn-error text-white">Reject & Redo</label>
+                            
+                            <form method="post" action="{% url 'officers:close_complaint' complaint.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success text-white">Verify & Close</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <input type="checkbox" id="reject-work-modal" class="modal-toggle" />
+                    <div class="modal">
+                        <div class="modal-box">
+                            <h3 class="font-bold text-lg text-error">Reject Work?</h3>
+                            <p class="py-4">This will send the complaint back to <strong>In Progress</strong>.</p>
+                            
+                            <form method="post" action="{% url 'officers:reject_work' complaint.id %}">
+                                {% csrf_token %}
+                                <textarea name="rejection_reason" class="textarea textarea-bordered w-full h-24" placeholder="Explain what needs to be fixed..." required></textarea>
+                                <div class="modal-action">
+                                    <label for="reject-work-modal" class="btn">Cancel</label>
+                                    <button type="submit" class="btn btn-error text-white">Confirm Rejection</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
 
             </div>
         </div>

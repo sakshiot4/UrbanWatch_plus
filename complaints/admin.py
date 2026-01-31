@@ -15,6 +15,11 @@ class ComplaintAdmin(admin.ModelAdmin):
         ('Assignment', {
             'fields': ('citizen', 'officer', 'contractor', 'status')
         }),
+
+        ('Work Verification', {  # <--- NEW SECTION
+            'fields': ('completion_image', 'officer_feedback', 'completed_at', 'closed_at')
+        }),
+
         ('Timestamps', {
             'fields': ('created_at', 'updated_at')
         }),

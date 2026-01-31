@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 from users.models import Citizen
 from officers.models import Officer
 from contractors.models import Contractor
@@ -52,6 +53,9 @@ class Complaint(models.Model):
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     proof_image = models.ImageField(upload_to='complaint_proofs/', null=True, blank=True)
     tracking_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    completion_image = models.ImageField(upload_to='complaint_proofs/', null=True, blank=True)
+
+    officer_feedback = models.TextField(null=True, blank=True, help_text="Officer feedback when work is rejected.")
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -78,6 +82,11 @@ class Complaint(models.Model):
     def can_transition_to(self, new_status):
         """Check if the complaint can transition to the new status."""
         return new_status in self.STATUS_TRANSITIONS.get(self.status, [])
+    
+    def clean(self):
+        if self.status == 'completed' and not self.completion_image:
+            raise ValidationError("Completion image is required to mark as completed.")
+
     
     def __str__(self):
         return f"{self.title} ({self.status})"

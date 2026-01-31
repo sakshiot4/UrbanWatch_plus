@@ -45,14 +45,41 @@
                 <p class="text-gray-700 leading-relaxed">{{ complaint.description }}</p>
             </div>
             
-            <!-- Proof Image (if exists) -->
-            {% if complaint.proof_image %}
-            <div class="divider"></div>
-            <div class="mb-6">
-                <h3 class="font-semibold mb-2">Proof Image</h3>
-                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow">
-            </div>
-            {% endif %}
+            <!-- Proof Image (if exists) and Work Validition -->
+            <div class="divider">Work Verification</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="card bg-base-100 shadow border border-base-200">
+                        <figure class="px-4 pt-4">
+                            {% if complaint.proof_image %}
+                                <img src="{{ complaint.proof_image.url }}" alt="Before" class="rounded-xl h-64 object-cover w-full">
+                            {% else %}
+                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">No Image</div>
+                            {% endif %}
+                        </figure>
+                        <div class="card-body p-4 text-center">
+                            <h3 class="font-bold text-gray-500">BEFORE (Reported)</h3>
+                        </div>
+                    </div>
+
+                    <div class="card bg-base-100 shadow border {% if complaint.status == 'completed' %}border-success{% else %}border-base-200{% endif %}">
+                        <figure class="px-4 pt-4">
+                            {% if complaint.completion_image %}
+                                <img src="{{ complaint.completion_image.url }}" alt="After" class="rounded-xl h-64 object-cover w-full">
+                            {% else %}
+                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">
+                                    Pending Upload
+                                </div>
+                            {% endif %}
+                        </figure>
+                        <div class="card-body p-4 text-center">
+                            <h3 class="font-bold {% if complaint.status == 'completed' %}text-success{% else %}text-gray-500{% endif %}">
+                                AFTER (Proof)
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                            
             
             <!-- Citizen Details -->
             <div class="divider"></div>
@@ -103,12 +130,24 @@
                 </div>
             </div>
             
+            {% if complaint.officer_feedback and complaint.status == 'in_progress' %}
+                <div class="alert alert-warning shadow-lg mb-6 border-l-4 border-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <div>
+                        <h3 class="font-bold text-lg">⚠️ Officer Feedback (Action Required)</h3>
+                        <p class="py-2 italic">"{{ complaint.officer_feedback }}"</p>
+                        <div class="text-xs opacity-75">Please redo the work based on this feedback and upload a new photo.</div>
+                    </div>
+                </div>
+            {% endif %} 
+
             <!-- Status Update Section (only if active) -->
             {% if status_form %}
             <div class="divider"></div>
             <div class="mb-6">
                 <h3 class="font-semibold mb-3">Update Work Status</h3>
-                <form method="post" action="{% url 'contractors:contractor_update_status' complaint.id %}" class="space-y-3">
+
+                <form method="post" enctype="multipart/form-data" action="{% url 'contractors:contractor_update_status' complaint.id %}" class="space-y-3">
                     {% csrf_token %}
                     <div class="form-control">
                         <label class="label">
@@ -116,6 +155,14 @@
                         </label>
                         {{ status_form.status }}
                     </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Proof of Completion (Required if completing):</span>
+                        </label>
+                        {{ status_form.completion_image }}
+                    </div>
+        
                     <button type="submit" class="btn btn-primary btn-sm">
                         Update Status
                     </button>

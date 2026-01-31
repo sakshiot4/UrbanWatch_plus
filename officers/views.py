@@ -295,3 +295,38 @@ def contractor_approvals(request):
         'pending_contractors': pending_contractors,
     }
     return render(request, 'officers/contractor_approvals.html', context)
+
+
+@login_required
+@transaction.atomic
+def reject_work(request, complaint_id):
+    officer = get_object_or_404(Officer, user=request.user)
+    complaint = get_object_or_404(
+        Complaint.objects.select_for_update(),
+        id=complaint_id,
+        officer=officer
+    )
+
+    if request.method == 'POST':
+        reason = request.POST.get('rejection_reason', '').strip()
+
+        if not reason:
+            messages.error(request, "Rejection reason is required.")
+            return redirect('officers:complaint_detail', complaint.id)
+
+        if not complaint.can_transition_to('in_progress'):
+            messages.error(request, "Cannot reject work at this stage.")
+            return redirect('officers:complaint_detail', complaint.id)
+
+        complaint.status = 'in_progress'
+        complaint.completed_at = None
+        complaint.in_progress_at = timezone.now()
+        complaint.officer_feedback = reason  # renamed field
+
+        complaint.save()
+        messages.warning(
+            request,
+            "Work rejected. Sent back to contractor for correction."
+        )
+
+    return redirect('officers:complaint_detail', complaint.id)

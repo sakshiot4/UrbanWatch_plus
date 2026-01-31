@@ -127,17 +127,35 @@ def contractor_update_status(request, complaint_id):
         return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
     
     if request.method == 'POST':
-        form = ContractorStatusUpdateForm(request.POST, instance=complaint)
+        form = ContractorStatusUpdateForm(request.POST, request.FILES, instance=complaint)
         if form.is_valid():
             new_status = form.cleaned_data['status']
 
+            if new_status == current_status:
+                messages.info(request, "No status change detected.")
+                return redirect(
+                    'contractors:contractor_complaint_detail',
+                    complaint_id=complaint.id
+                )
+
+            #check if the img is uploaded OR if one is alraedy there in DB.
+            has_image = form.cleaned_data['completion_image'] or complaint.completion_image
+
+            if new_status == 'completed' and not has_image:
+                messages.error(request, "⚠️ You must upload a 'Proof of Work' image to mark this as Completed.")
+                return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
+
+
             # Use current_status (before form), not complaint.status (which may change)
             if current_status == 'in_progress' and new_status == 'completed':
+                complaint = form.save(commit=False)
                 complaint.status = 'completed'
 
                 #set completed_at timesptamp if not already set.
                 if complaint.completed_at is None:
                     complaint.completed_at = timezone.now()
+
+                complaint.officer_feedback = None
                     
                 complaint.save()
                 messages.success(request, "Work marked as completed. Officer will review and close.")
