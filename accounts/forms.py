@@ -1,195 +1,230 @@
 from django import forms
 from django.contrib.auth.models import User
 from allauth.account.forms import SignupForm
-
 from users.models import Citizen
 from contractors.models import Contractor
+import re
+
 
 class CitizenSignupForm(SignupForm):
-    """Sign up form for citizens."""
-
-    name = forms.CharField(max_length = 255, required = True,
-                label='Full Name',
-                widget=forms.TextInput(
-                    attrs={'class':'input input-bordered w-full',
-                           'placeholder': 'Your full name'}
-                ))
-    
-    phone = forms.CharField(max_length=10, required=True,
-        label='Phone Number',
-        widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-            'placeholder': '10-digit phone number'
-        }),
-        help_text='10 digits only'
-    )
-
-    address = forms.CharField(
-        max_length=255,
+    # 1. Account Fields
+    username = forms.CharField(
+        max_length=150,
         required=True,
-        label='Address',
         widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Your residential address'
+            'placeholder': 'Choose a unique username',
+            'class': 'form-input' # We style this class in CSS below
+        })
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'name@example.com',
+            'class': 'form-input'
+        })
+    )
+    password1 = forms.CharField(
+        label="Password",
+        min_length=8,
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Min. 8 characters',
+            'class': 'form-input'
+        })
+    )
+    password2 = forms.CharField(
+        label="Confirm Password",
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Re-enter password',
+            'class': 'form-input'
         })
     )
 
+    # 2. Personal Fields
+    name = forms.CharField(
+        max_length=100,
+        label="Full Name",
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. Rahul Sharma',
+            'class': 'form-input'
+        })
+    )
+    phone = forms.CharField(
+        max_length=10,
+        min_length=10,
+        label="Phone Number",
+        help_text="10-digit mobile number",
+        widget=forms.TextInput(attrs={
+            'placeholder': '9876543210',
+            'pattern': '[0-9]{10}', # HTML5 validation for 10 digits
+            'title': 'Please enter a valid 10-digit mobile number',
+            'class': 'form-input'
+        })
+    )
     region = forms.ChoiceField(
-        required=True,
-        label='Region',
-        widget=forms.Select(attrs={
-            'class': 'select select-bordered w-full'
+        choices=[('', 'Select your Ward/Zone')] + [('ward_a', 'Ward A (Colaba)'), ('ward_b', 'Ward B (Bandra)'), ('ward_c', 'Ward C (Andheri)')], # Update with your real choices
+        widget=forms.Select(attrs={'class': 'form-input'})
+    )
+    address = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Flat No, Building, Street...',
+            'rows': 3,
+            'class': 'form-input'
         })
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        #Set region choices.
+        # 1. Populate Region choices from the Model
         self.fields['region'].choices = Citizen.REGION_CHOICES
+        
+        # 2. Style the default Allauth fields (username, email, password)
+        # We don't need to define them above, Allauth adds them automatically.
+        # We just add CSS classes here.
+        for field in ['username', 'email', 'password1', 'password2']:
+            if field in self.fields:
+                self.fields[field].widget.attrs.update({
+                    'class': 'input input-bordered w-full'
+                })
+                
+    def save(self, request):
+        """
+        The Master Save Method.
+        1. Saves the User (Auth Table)
+        2. Saves the Citizen (Profile Table)
+        """
+        # 1. Let Allauth create the User object first
+        user = super().save(request)
 
-        #Style inherited fields.
-        self.fields['username'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Choose a username',
-        })
+        # 2. Create the linked Citizen Profile
+        Citizen.objects.create(
+            user=user,
+            name=self.cleaned_data['name'],
+            phone=self.cleaned_data['phone'],
+            address=self.cleaned_data['address'],
+            region=self.cleaned_data['region']
+        )
+        
+        # 3. Return the user object (Required by Allauth)
+        return user
+    # --- CUSTOM VALIDATIONS ---
 
-        self.fields['email'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'your@email.com'
-        })
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("This username is already taken.")
+        return username
 
-        self.fields['password1'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Password'
-        })
-        self.fields['password2'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Confirm password'
-        })
+    # def clean_email(self):
+    #     email = self.cleaned_data.get('email')
+    #     if User.objects.filter(email=email).exists():
+    #         raise forms.ValidationError("An account with this email already exists.")
+    #     return email
 
     def clean_phone(self):
-            phone = self.cleaned_data.get('phone')
-            if phone and not phone.isdigit():
-                raise forms.ValidationError('Phone number must contain only digits.')
-            
-            if phone and len(phone) != 10:
-                raise forms.ValidationError('Phone number must be exactly 10 digits')
-            
-            return phone
-        
-    def save(self, request):
-            user = super().save(request)
+        phone = self.cleaned_data.get('phone')
+        if not re.match(r'^\d{10}$', phone):
+            raise forms.ValidationError("Phone number must be exactly 10 digits.")
+        return phone
 
-            #Create Citizen Profile.
-            Citizen.objects.create(
-                user=user,
-                name=self.cleaned_data.get('name'),
-                phone=self.cleaned_data.get('phone'),
-                address=self.cleaned_data.get('address'),
-                region=self.cleaned_data.get('region'),
-            )
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get("password1")
+        p2 = cleaned_data.get("password2")
 
-            return user
-        
+        if p1 and p2 and p1 != p2:
+            self.add_error('password2', "Passwords do not match.")
+
+
+from django import forms
+from django.contrib.auth.models import User
+from allauth.account.forms import SignupForm
+from users.models import Citizen
+from contractors.models import Contractor
+import re
+
+# ... (CitizenSignupForm remains the same) ...
+
 class ContractorSignupForm(SignupForm):
-    """Signup form for Contractors."""
+    """Signup form for Contractors with strict validation."""
 
-    name = forms.CharField(
-        max_length=255,
+    # --- 1. LOGIN FIELDS (Must be explicit for custom styling) ---
+    username = forms.CharField(
+        max_length=150, required=True,
+        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Username'})
+    )
+    email = forms.EmailField(
         required=True,
-        label='Full Name',
-        widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Your full name'
-        })
+        widget=forms.EmailInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Email'})
+    )
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Password'})
+    )
+    password2 = forms.CharField(
+        label="Confirm Password",
+        widget=forms.PasswordInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Confirm Password'})
+    )
+
+    # --- 2. BUSINESS FIELDS ---
+    name = forms.CharField(
+        max_length=255, required=True,
+        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Full Name'})
     )
 
     company_name = forms.CharField(
-        max_length=255,
-        required=True,
-        label='Company Name',
-        widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-            'placeholder': 'e.g., ABC Repairs'
-        })
+        max_length=255, required=True,
+        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Company Name'})
     )
 
     phone = forms.CharField(
-        max_length=10,
-        required=True,
-        label='Contact Phone',
-        widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-            'placeholder': '10-digit phone number'
-        }),
-        help_text='10 digits only'
+        max_length=10, required=True,
+        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': '10-digit Contact'})
     )
 
     specialization = forms.ChoiceField(
         required=True,
-        label='Specialization',
         choices=Contractor.CATEGORY_CHOICES,
-        widget=forms.Select(attrs={
-            'class': 'select select-bordered w-full'
-        })
+        widget=forms.Select(attrs={'class': 'select select-bordered w-full'})
     )
 
     region = forms.ChoiceField(
         required=True,
-        label='Service Region',
-        widget=forms.Select(attrs={
-            'class': 'select select-bordered w-full'
-        })
+        # Ensure your Contractor model uses REGION_CHOICES (plural)
+        choices=Contractor.REGION_CHOICES, 
+        widget=forms.Select(attrs={'class': 'select select-bordered w-full'})
     )
 
     license_number = forms.CharField(
-        max_length=100,
-        required=True,
-        label='License Number',
-        widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Your license number'
-        })
+        max_length=100, required=True,
+        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'License ID'})
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Set region choices
+        # Explicitly set choices to ensure they load
         self.fields['region'].choices = Contractor.REGION_CHOICES
-        
-        # Style inherited fields
-        self.fields['username'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Choose a username'
-        })
-        self.fields['email'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'your@email.com'
-        })
-        self.fields['password1'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Password'
-        })
-
-        self.fields['password2'].widget.attrs.update({
-            'class': 'input input-bordered w-full',
-            'placeholder': 'Confirm password'
-        })
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
-        if phone and not phone.isdigit():
-            raise forms.ValidationError('Phone number must contain only digits')
-        if phone and len(phone) != 10:
-            raise forms.ValidationError('Phone number must be exactly 10 digits')
+        if not phone.isdigit():
+            raise forms.ValidationError('Use digits only.')
+        if Contractor.objects.filter(phone=phone).exists():
+            raise forms.ValidationError('This phone number is already in use by another contractor.')
         return phone
-            
+
+    def clean_license_number(self):
+        lic = self.cleaned_data.get('license_number')
+        if Contractor.objects.filter(license_number=lic).exists():
+            raise forms.ValidationError('This license number is already registered in our system.')
+        return lic
+
+    # --- THE CRITICAL FIX ---
+    # Renamed from 'try_save' to 'save' so the view calls it correctly
     def save(self, request):
+        # 1. Let Allauth create the User (Auth Table)
         user = super().save(request)
         
-        # Create Contractor profile with "pending" status
+        # 2. Create the Contractor Profile (Profile Table)
         Contractor.objects.create(
             user=user,
             name=self.cleaned_data.get('name'),
@@ -199,7 +234,8 @@ class ContractorSignupForm(SignupForm):
             specialization=self.cleaned_data.get('specialization'),
             region=self.cleaned_data.get('region'),
             license_number=self.cleaned_data.get('license_number'),
-            status='pending',  # Awaiting officer approval
+            status='pending', 
         )
         
+        # 3. Return user (Required)
         return user

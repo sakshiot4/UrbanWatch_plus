@@ -1,124 +1,195 @@
 {% extends "base.html" %}
 
-{% block title %}Citizen Sign Up{% endblock %}
+{% block title %}Citizen Sign Up - UrbanWatch+{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-base-200 py-8">
-    <div class="card w-full max-w-md shadow-xl bg-base-100">
-        <div class="card-body">
-            <h2 class="card-title text-2xl mb-2">Create Citizen Account</h2>
-            <p class="text-sm text-gray-600 mb-6">Submit and track your complaints</p>
-            
-            <form method="post" class="space-y-4">
-                {% csrf_token %}
-                
-                <!-- Username -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Username</span>
-                    </label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.username.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Email -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Email</span>
-                    </label>
-                    {{ form.email }}
-                    {% if form.email.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.email.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Full Name -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Full Name</span>
-                    </label>
-                    {{ form.name }}
-                    {% if form.name.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.name.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Phone -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Phone Number</span>
-                    </label>
-                    {{ form.phone }}
-                    {% if form.phone.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.phone.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Address -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Address</span>
-                    </label>
-                    {{ form.address }}
-                    {% if form.address.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.address.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Region -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Region</span>
-                    </label>
-                    {{ form.region }}
-                    {% if form.region.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.region.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Password -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Password</span>
-                    </label>
-                    {{ form.password1 }}
-                    {% if form.password1.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.password1.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Confirm Password -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Confirm Password</span>
-                    </label>
-                    {{ form.password2 }}
-                    {% if form.password2.errors %}
-                        <span class="text-error text-sm mt-1">{{ form.password2.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Submit -->
-                <button type="submit" class="btn btn-primary btn-block mt-6">
-                    Create Account
-                </button>
-            </form>
-            
-            <!-- Links -->
-            <div class="mt-6 space-y-3 pt-4 border-t border-gray-300">
-                <p class="text-sm text-center text-gray-600">
-                    Already have an account?
-                    <a href="{% url 'account_login' %}" class="link link-primary">Login</a>
-                </p>
-                
-                <p class="text-sm text-center text-gray-600">
-                    Are you a contractor?
-                    <a href="{% url 'accounts:contractor_signup' %}" class="link link-secondary">Sign up here</a>
-                </p>
+<div class="min-h-screen flex items-center justify-center bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 relative z-20">
+
+    <div class="bg-white p-8 md:p-10 rounded-xl shadow-xl w-full max-w-4xl border border-gray-200 animate-fade-in">
+        
+        <div class="mb-8 text-center border-b border-gray-100 pb-6">
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Create Citizen Account</h2>
+            <p class="text-slate-500 text-sm mt-2">Join the community and start improving your neighborhood.</p>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm flex items-start gap-2">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
             </div>
         </div>
+        {% endif %}
+        
+        <form method="post" class="space-y-6" novalidate> {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="space-y-5">
+                    <h3 class="text-xs font-bold text-purple-600 uppercase tracking-widest border-b border-purple-100 pb-2 mb-4">
+                        Account Details
+                    </h3>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Username <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.username.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Email Address <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.email.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Password <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.password1 }}
+                        <p class="text-[10px] text-gray-400 mt-1">Minimum 8 characters.</p>
+                        {% if form.password1.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.password1.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Confirm Password <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.password2.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <h3 class="text-xs font-bold text-teal-600 uppercase tracking-widest border-b border-teal-100 pb-2 mb-4">
+                        Personal Information
+                    </h3>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Full Name <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.name.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Phone Number <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.phone.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Region / Ward <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.region }}
+                        {% if form.region.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.region.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Address <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                ⚠ {{ form.address.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-6 border-t border-gray-100">
+                <button type="submit" class="block w-full md:w-auto md:px-12 ml-auto bg-purple-600 hover:bg-purple-700 text-white font-bold p-4 rounded-lg shadow-lg hover:shadow-xl transition-all transform active:scale-95 text-sm uppercase tracking-widest">
+                    Create Account
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+            <p class="text-sm text-gray-500 mb-4">Already have an account?</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="{% url 'account_login' %}" class="px-6 py-2 border border-gray-200 rounded-full text-gray-600 font-bold text-xs uppercase tracking-wide hover:bg-gray-50 hover:text-purple-600 transition-colors">
+                    Login Here
+                </a>
+                <a href="{% url 'accounts:contractor_signup' %}" class="px-6 py-2 border border-teal-100 bg-teal-50/50 rounded-full text-teal-700 font-bold text-xs uppercase tracking-wide hover:bg-teal-100 transition-colors">
+                    Contractor Sign Up
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<style>
+    /* 1. Base Input Style */
+    input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select, textarea {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #F9FAFB;
+        border: 1px solid #D1D5DB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #1F2937;
+        transition: all 0.2s;
+    }
+
+    /* 2. Focus State */
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #9333EA; /* Purple */
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+    }
+
+    /* 3. Placeholder Styling */
+    ::placeholder {
+        color: #9CA3AF;
+        font-size: 0.8rem;
+    }
+
+    /* 4. ERROR State (Targeting inputs that have a sibling error message if possible, 
+       but Django doesn't add class automatically. 
+       Usually we add a class in forms.py like 'is-invalid' if error exists. 
+       For now, we rely on the Python code returning specific error messages below the field.) */
+</style>
 {% endblock %}

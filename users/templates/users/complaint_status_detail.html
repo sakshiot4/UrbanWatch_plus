@@ -1,176 +1,149 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Complaint Status{% endblock %}
+{% block title %}Case #{{ complaint.id }} - UrbanWatch+{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-6">
-    <a href="{% url 'users:citizen_dashboard' %}" class="btn btn-ghost btn-sm mb-4">← Back to My Complaints</a>
-    
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <div class="flex justify-between items-start mb-6">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="min-h-screen bg-slate-50 w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] -mt-8 -mb-8">
+
+    <div class="relative pb-24 pt-10 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-r 
+        {% if complaint.status == 'reported' %} from-purple-900 via-indigo-900 to-slate-900
+        {% elif complaint.status == 'assigned' %} from-blue-900 via-indigo-900 to-slate-900
+        {% elif complaint.status == 'in_progress' %} from-amber-900 via-orange-900 to-slate-900
+        {% elif complaint.status == 'completed' %} from-emerald-900 via-teal-900 to-slate-900
+        {% else %} from-slate-800 via-gray-800 to-black {% endif %}">
+        
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-20 bg-white"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-20 bg-white"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto z-10">
+            <a href="{% url 'users:citizen_dashboard' %}" class="inline-flex items-center text-white/70 hover:text-white transition-colors mb-6 text-sm font-bold gap-2">
+                &larr; Back to Dashboard
+            </a>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h2 class="card-title text-3xl mb-1">{{ complaint.title }}</h2>
-                    <p class="text-sm text-gray-500">
-                        Complaint ID: #{{ complaint.id }} <span class="mx-2">•</span> 
-                        <span class="font-semibold">Region: {{ complaint.get_region_display }}</span>
-                    </p>
-                </div>
-                <div class="badge {% if complaint.status == 'reported' %}badge-warning{% elif complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% elif complaint.status == 'completed' %}badge-success{% else %}badge-neutral{% endif %} badge-lg p-4">
-                    {{ complaint.get_status_display }}
-                </div>
-            </div>
-            
-            <div class="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-100">
-                <h3 class="font-bold text-gray-700 mb-2">Description</h3>
-                <p class="text-gray-700">{{ complaint.description }}</p>
-            </div>
-
-            <div class="divider">Location Details</div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="md:col-span-1 space-y-3">
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Address</p>
-                        <p class="text-sm">{{ complaint.location|default:"Address not available" }}</p>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-white text-[10px] font-mono uppercase tracking-widest">Case File</span>
+                        <span class="text-white/60 font-mono text-sm">#{{ complaint.id }}</span>
                     </div>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Pincode</p>
-                        <p class="text-sm badge badge-ghost">{{ complaint.pincode|default:"N/A" }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">GPS Coordinates</p>
-                        <p class="text-xs font-mono text-gray-600">{{ complaint.latitude|floatformat:4 }}, {{ complaint.longitude|floatformat:4 }}</p>
-                    </div>
+                    <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">{{ complaint.title }}</h1>
                 </div>
 
-                <div class="md:col-span-2">
-                    <div id="detail-map" class="h-64 w-full rounded-lg border border-gray-300 z-0 shadow-inner"></div>
-                </div>
-            </div>
-            
-           <!-- {% if complaint.proof_image %}
-            <div class="divider">Proof of Work</div>
-            <div class="mb-6">
-                <h3 class="font-semibold mb-2">Uploaded Image</h3>
-                <img src="{{ complaint.proof_image.url }}" alt="Proof" class="max-w-sm rounded-lg shadow-md border hover:scale-105 transition-transform duration-200">
-            </div>
-            {% endif %} -->
-
-            <!-- Proof Image (if exists) and Work Validition -->
-            <div class="divider">Work Verification</div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="card bg-base-100 shadow border border-base-200">
-                        <figure class="px-4 pt-4">
-                            {% if complaint.proof_image %}
-                                <img src="{{ complaint.proof_image.url }}" alt="Before" class="rounded-xl h-64 object-cover w-full">
-                            {% else %}
-                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">No Image</div>
-                            {% endif %}
-                        </figure>
-                        <div class="card-body p-4 text-center">
-                            <h3 class="font-bold text-gray-500">BEFORE (Reported)</h3>
-                        </div>
-                    </div>
-
-                    <div class="card bg-base-100 shadow border {% if complaint.status == 'completed' %}border-success{% else %}border-base-200{% endif %}">
-                        <figure class="px-4 pt-4">
-                            {% if complaint.completion_image %}
-                                <img src="{{ complaint.completion_image.url }}" alt="After" class="rounded-xl h-36 object-cover w-full">
-                            {% else %}
-                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">
-                                    Pending Upload
-                                </div>
-                            {% endif %}
-                        </figure>
-                        <div class="card-body p-4 text-center">
-                            <h3 class="font-bold {% if complaint.status == 'completed' %}text-success{% else %}text-gray-500{% endif %}">
-                                AFTER (Proof)
-                            </h3>
-                        </div>
-                    </div>
-                </div>
-                            
-            
-            <div class="divider">Assigned Team</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="bg-base-200 p-4 rounded-lg border border-base-300">
-                    <h3 class="font-bold text-gray-700 mb-1">👮 Assigned Officer</h3>
-                    {% if complaint.officer %}
-                    <p class="text-lg">{{ complaint.officer.name }}</p>
-                    <p class="text-xs text-gray-500">{{ complaint.officer.email }}</p>
-                    {% else %}
-                    <p class="text-gray-500 italic text-sm">Pending Assignment</p>
-                    {% endif %}
-                </div>
-                <div class="bg-base-200 p-4 rounded-lg border border-base-300">
-                    <h3 class="font-bold text-gray-700 mb-1">👷 Assigned Contractor</h3>
-                    {% if complaint.contractor %}
-                    <p class="text-lg">{{ complaint.contractor.name }}</p>
-                    <p class="text-xs text-gray-500">{{ complaint.contractor.email }}</p>
-                    {% else %}
-                    <p class="text-gray-500 italic text-sm">Pending Assignment</p>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="divider">History</div>
-            <div class="mb-6 pl-4">
-                <div class="space-y-4">
-                    {% for step in timeline %}
-                    <div class="flex gap-4">
-                        <div class="flex flex-col items-center">
-                            <div class="{% if step.completed %}badge badge-success text-white{% else %}badge badge-ghost border-gray-400{% endif %} w-8 h-8 flex items-center justify-center rounded-full font-bold z-10">
-                                {% if step.completed %}✓{% else %}●{% endif %}
-                            </div>
-                            {% if not forloop.last %}
-                            <div class="w-0.5 h-full bg-gray-200 -my-1"></div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="flex-1 pb-6">
-                            <p class="font-bold text-gray-800">{{ step.label }}</p>
-                            <p class="text-sm text-gray-600">{{ step.description }}</p>
-                            {% if step.date %}
-                            <p class="text-xs text-gray-400 mt-1">{{ step.date|date:"M d, Y • h:i A" }}</p>
-                            {% else %}
-                            <p class="text-xs text-gray-400 mt-1 italic">Pending...</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
+                <div class="flex flex-col items-end">
+                    <span class="text-xs font-bold text-white/70 uppercase tracking-widest mb-1">Current Status</span>
+                    <span class="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide border shadow-lg backdrop-blur-md flex items-center gap-2 bg-white/20 border-white/20 text-white">
+                        {{ complaint.get_status_display }}
+                    </span>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="relative max-w-7xl mx-auto -mt-16 z-20">
+        
+        <div class="hidden lg:grid grid-cols-3 gap-8 px-8">
+            <div class="col-span-2 space-y-8">
+                {% include "complaints/includes/card_description.html" %}
+                {% include "complaints/includes/card_evidence.html" %}
+                
+                <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                    <div class="bg-slate-50 border-b border-slate-100 px-6 py-4"><h3 class="font-bold text-slate-800">Location</h3></div>
+                    <div class="relative">
+                         <div id="detail-map-desktop" class="h-64 w-full z-0"></div>
+                         <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-lg text-xs z-[400]">
+                            <p class="font-bold text-slate-700">{{ complaint.location|default:"Address unavailable" }}</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-8">
+                {% include "complaints/includes/card_team.html" %}
+                {% include "complaints/includes/card_timeline.html" %}
+                {% include "complaints/includes/card_token.html" %}
+            </div>
+        </div>
+
+        <div class="lg:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 px-4 pb-8 scrollbar-hide">
+            
+            <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
+                {% include "complaints/includes/card_description.html" %}
+                {% include "complaints/includes/card_team.html" %}
+                <div class="text-center text-xs text-slate-400 font-mono animate-pulse">Swipe for Evidence &rarr;</div>
+            </div>
+
+            <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
+                {% include "complaints/includes/card_evidence.html" %}
+                
+                <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                    <div class="bg-slate-50 border-b border-slate-100 px-6 py-4"><h3 class="font-bold text-slate-800">Location</h3></div>
+                    <div class="relative">
+                         <div id="detail-map-mobile" class="h-64 w-full z-0 bg-slate-100"></div>
+                         <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-lg text-xs z-[400]">
+                            <p class="font-bold text-slate-700">{{ complaint.location|default:"Address unavailable" }}</p>
+                         </div>
+                    </div>
+                </div>
+                <div class="text-center text-xs text-slate-400 font-mono animate-pulse">Swipe for History &rarr;</div>
+            </div>
+
+            <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
+                {% include "complaints/includes/card_timeline.html" %}
+                {% include "complaints/includes/card_token.html" %}
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Get coordinates from Django template
         var lat = "{{ complaint.latitude|default:'null' }}";
         var lng = "{{ complaint.longitude|default:'null' }}";
+        var hasCoords = (lat !== 'null' && lng !== 'null');
 
-        if (lat !== 'null' && lng !== 'null') {
-            // Initialize map
-            var map = L.map('detail-map').setView([lat, lng], 15);
+        if (hasCoords) {
+            
+            // 1. Initialize Desktop Map (If visible)
+            var desktopEl = document.getElementById('detail-map-desktop');
+            if (desktopEl) {
+                var mapD = L.map('detail-map-desktop', {zoomControl: false}).setView([lat, lng], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapD);
+                L.marker([lat, lng]).addTo(mapD).bindPopup("<b>Incident</b>");
+            }
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            // Add marker (Not draggable, just showing location)
-            L.marker([lat, lng]).addTo(map)
-                .bindPopup("<b>Issue Reported Here</b>")
-                .openPopup();
-        } else {
-            // Fallback if no location data
-            document.getElementById('detail-map').innerHTML = 
-                '<div class="flex items-center justify-center h-full bg-gray-100 text-gray-500">No location map available</div>';
+            // 2. Initialize Mobile Map (Always)
+            // Since we use CSS Scroll, this div is technically "visible" to the browser, just off-screen.
+            // Leaflet should handle this much better than Swiper.
+            var mobileEl = document.getElementById('detail-map-mobile');
+            if (mobileEl) {
+                var mapM = L.map('detail-map-mobile', {zoomControl: false}).setView([lat, lng], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapM);
+                L.marker([lat, lng]).addTo(mapM).bindPopup("<b>Incident</b>");
+                
+                // Extra safety: Fix gray map if it initializes while scrolling
+                setTimeout(function(){ mapM.invalidateSize(); }, 1000);
+            }
         }
     });
 </script>
+
+<style>
+    /* Hide Scrollbar but allow scrolling */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
 {% endblock %}

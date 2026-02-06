@@ -1,0 +1,15 @@
+{% if page_obj.has_other_pages %}
+<div class="mt-6 flex justify-center gap-2">
+    {% if page_obj.has_previous %}
+        <a href="?{{ param_name }}={{ page_obj.previous_page_number }}" class="px-3 py-1 bg-white border rounded text-xs font-bold text-slate-600 hover:bg-slate-100">Prev</a>
+    {% endif %}
+    
+    <span class="px-3 py-1 bg-slate-800 rounded text-xs font-bold text-white border border-slate-800">
+        Page {{ page_obj.number }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?{{ param_name }}={{ page_obj.next_page_number }}" class="px-3 py-1 bg-white border rounded text-xs font-bold text-slate-600 hover:bg-slate-100">Next</a>
+    {% endif %}
+</div>
+{% endif %}

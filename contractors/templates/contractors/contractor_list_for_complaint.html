@@ -1,67 +1,150 @@
 {% extends "base.html" %}
 
-{% block title %}Choose Contractor{% endblock %}
+{% block title %}Deploy Unit - UrbanWatch+{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-6">
-    <!-- Back Button -->
-    <a href="{% url 'officers:complaint_detail' complaint.id %}" class="btn btn-ghost btn-sm mb-4">← Back to Complaint</a>
-    
-    <!-- Header -->
-    <div class="mb-6">
-        <h2 class="text-3xl font-bold mb-2">Choose Contractor</h2>
-        <p class="text-gray-600">
-            Complaint: <span class="font-semibold">{{ complaint.title }}</span>
-        </p>
-    </div>
-    
-    {% if contractors %}
-    <div class="grid gap-4">
-        {% for contractor in contractors %}
-        <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow">
-            <div class="card-body">
-                <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                        <h3 class="card-title text-lg">{{ contractor.name }}</h3>
-                        
-                        <!-- Details Grid -->
-                        <div class="grid grid-cols-2 gap-4 mt-3 text-sm">
-                            <div>
-                                <p class="text-gray-600">Company</p>
-                                <p class="font-semibold">{{ contractor.company_name|default:"Not specified" }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Specialization</p>
-                                <p class="font-semibold">{{ contractor.specialization|default:"General" }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Email</p>
-                                <p class="font-semibold">{{ contractor.email }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Phone</p>
-                                <p class="font-semibold">{{ contractor.phone|default:"Not provided" }}</p>
-                            </div>
-                        </div>
+<div class="min-h-screen bg-slate-50 pb-12 flex flex-col lg:-m-8 -m-4 -mt-8 -mb-8">
+
+    <div class="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 pt-8 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl z-0">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
+        
+        <div class="relative max-w-7xl mx-auto z-10">
+            <a href="{% url 'officers:complaint_detail' complaint.id %}" class="inline-flex items-center text-slate-400 hover:text-white mb-4 text-xs font-bold uppercase tracking-widest transition-colors group">
+                <span class="group-hover:-translate-x-1 transition-transform mr-2">&larr;</span>  Dashboard
+            </a>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="px-2 py-0.5 rounded bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-mono uppercase tracking-widest backdrop-blur-sm">
+                            Deployment
+                        </span>
+                        <span class="font-mono text-slate-400 opacity-60">Case #{{ complaint.id }}</span>
                     </div>
-                    
-                    <!-- Select Button -->
-                    <a
-                        href="{% url 'officers:complaint_detail' complaint.id %}?contractor_id={{ contractor.id }}"
-                        class="btn btn-primary btn-sm"
-                    >
-                        Select
-                    </a>
+                    <h1 class="text-2xl md:text-4xl font-black text-white tracking-tight leading-none line-clamp-1">Select Contractor</h1>
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <div class="alert alert-info">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span>No contractors available. Please add contractors first.</span>
+
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 w-full">
+        
+        {% if complaint.contractor %}
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-md mb-8 flex justify-between items-center animate-pulse-slow">
+            <div>
+                <h3 class="text-[10px] font-bold text-amber-800 uppercase tracking-widest mb-1">Currently Assigned</h3>
+                <p class="text-sm font-bold text-amber-900">{{ complaint.contractor.name }}</p>
+            </div>
+            <div class="text-amber-600 bg-amber-100 p-2 rounded-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar pb-2">
+            <span class="px-3 py-1 bg-white/90 backdrop-blur rounded-full text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm whitespace-nowrap">
+                Region: <span class="text-blue-600">{{ complaint.get_region_display }}</span>
+            </span>
+            <span class="px-3 py-1 bg-white/90 backdrop-blur rounded-full text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm whitespace-nowrap">
+                Specialty: <span class="text-blue-600">{{ complaint.get_category_display }}</span>
+            </span>
+        </div>
+
+        {% if contractors %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for contractor in contractors %}
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-2xl hover:border-blue-400 transition-all group relative">
+                
+                {% if contractor == complaint.contractor %}
+                <div class="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[9px] font-bold px-3 py-1 rounded-bl-lg shadow-sm z-10">
+                    ACTIVE UNIT
+                </div>
+                {% endif %}
+
+                <div class="p-5">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 font-bold flex items-center justify-center text-lg border border-slate-200 shadow-inner">
+                            {{ contractor.name|slice:":1" }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-slate-800 text-lg leading-tight truncate group-hover:text-blue-700 transition-colors">{{ contractor.name }}</h3>
+                            <p class="text-[10px] text-slate-400 uppercase tracking-wide truncate">{{ contractor.company_name|default:"Independent Contractor" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-sm mb-5 border-t border-slate-100 pt-3">
+                        <div>
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Specialty</span>
+                            <span class="text-slate-700 font-semibold truncate block flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                {{ contractor.specialization|default:"General" }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Region</span>
+                            <span class="text-slate-700 font-semibold truncate block flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                {{ contractor.get_region_display }}
+                            </span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Contact</span>
+                            <span class="text-slate-600 truncate block font-mono text-xs">{{ contractor.email }}</span>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{% url 'officers:assign_contractor' complaint.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="contractor" value="{{ contractor.id }}">
+                        
+                        <button type="submit" class="w-full py-3 rounded-lg font-bold text-xs uppercase tracking-widest shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95
+                            {% if contractor == complaint.contractor %}
+                                bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200
+                            {% else %}
+                                bg-slate-800 text-white hover:bg-blue-600 hover:shadow-blue-500/30 border border-transparent
+                            {% endif %}"
+                            {% if contractor == complaint.contractor %}disabled{% endif %}>
+                            
+                            {% if contractor == complaint.contractor %}
+                                <span>Currently Assigned</span>
+                            {% else %}
+                                <span>Assign Unit</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if is_paginated %}
+        <div class="mt-8 flex justify-center gap-2">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">Prev</a>
+            {% endif %}
+            <span class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold border border-slate-800 shadow-sm">Page {{ page_obj.number }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="bg-white rounded-xl border-2 border-dashed border-slate-300 p-12 text-center shadow-sm">
+            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-slate-900 font-bold text-lg">No Contractors Found</h3>
+            <p class="text-slate-500 text-sm mt-1 mb-4">No approved contractors found matching Region: <strong>{{ complaint.get_region_display }}</strong> & Specialty: <strong>{{ complaint.get_category_display }}</strong>.</p>
+            <a href="{% url 'officers:complaint_detail' complaint.id %}" class="btn btn-sm btn-outline">Return to Case File</a>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 {% endblock %}

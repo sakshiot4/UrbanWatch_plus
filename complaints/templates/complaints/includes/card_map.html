@@ -1,0 +1,10 @@
+<div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+    <div class="relative">
+         <div id="detail-map-desktop" class="h-64 w-full z-0 hidden lg:block"></div>
+         <div id="detail-map-mobile" class="h-64 w-full z-0 block lg:hidden"></div>
+         
+         <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-lg text-xs z-[400]">
+            <p class="font-bold text-slate-700">{{ complaint.location|default:"Address unavailable" }}</p>
+         </div>
+    </div>
+</div>

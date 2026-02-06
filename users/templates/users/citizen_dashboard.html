@@ -1,159 +1,201 @@
 {% extends "base.html" %}
 
-{% block title %}My Complaints{% endblock %}
+{% block title %}Dashboard - UrbanWatch+{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-    <div class="mb-8">
-        <h1 class="text-4xl font-bold">My Complaints</h1>
-        <p class="text-sm text-gray-600 mt-2">
-            Track all your submitted complaints and their status
-        </p>
-    </div>
-    
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-3 gap-4 mb-8">
-        <div class="card bg-base-100 shadow">
-            <div class="card-body">
-                <p class="text-sm text-gray-600">Total Complaints</p>
-                <p class="text-3xl font-bold">{{ total_count }}</p>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow">
-            <div class="card-body">
-                <p class="text-sm text-gray-600">Pending</p>
-                <p class="text-3xl font-bold text-warning">{{ pending_count }}</p>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow">
-            <div class="card-body">
-                <p class="text-sm text-gray-600">Completed</p>
-                <p class="text-3xl font-bold text-success">{{ completed_count }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Submit New Button -->
-    <div class="mb-8">
-        <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-primary">
-            + Submit New Complaint
-        </a>
-    </div>
-    
-    <!-- Pending Complaints Section -->
-    <div class="mb-12">
-        <h2 class="text-2xl font-bold mb-4">Pending Complaints ({{ pending_count }})</h2>
+<div class="min-h-screen bg-slate-50 w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] -mt-8 -mb-8">
+
+    <div class="relative bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 pt-12 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
         
-        {% if pending_complaints %}
-            <div class="space-y-4">
-                {% for complaint in pending_complaints %}
-                <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
-                    <div class="card-body">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <h3 class="card-title text-lg">{{ complaint.title }}</h3>
-                                <div class="flex gap-2 mt-2 flex-wrap">
-                                    <span class="badge badge-outline">{{ complaint.get_category_display }}</span>
-                                    <span class="badge {% if complaint.status == 'reported' %}badge-warning{% elif complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% endif %}">
-                                        {{ complaint.get_status_display }}
-                                    </span>
-                                    <span class="badge badge-ghost">{{ complaint.location }}</span>
-                                </div>
-                                <p class="mt-3 text-sm text-gray-700">{{ complaint.description|truncatewords:20 }}</p>
-                                
-                                <!-- Status Info -->
-                                <div class="mt-3 text-xs text-gray-600 space-y-1">
-                                    {% if complaint.officer %}
-                                    <p><strong>Officer:</strong> {{ complaint.officer.name }}</p>
-                                    {% else %}
-                                    <p><strong>Officer:</strong> Pending assignment</p>
-                                    {% endif %}
-                                    
-                                    {% if complaint.contractor %}
-                                    <p><strong>Contractor:</strong> {{ complaint.contractor.name }}</p>
-                                    {% endif %}
-                                    
-                                    <p><strong>Submitted:</strong> {{ complaint.created_at|date:"M d, Y H:i" }}</p>
-                                </div>
-                            </div>
-                            <a href="{% url 'users:complaint_status_detail' complaint.id %}" class="btn btn-ghost btn-sm whitespace-nowrap">
-                                View Status
-                            </a>
-                        </div>
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+        </div>
+
+        <div class="relative w-full px-4 md:px-8 flex flex-col md:flex-row justify-between items-end gap-6 z-10">
+            <div>
+                {% if messages %}
+                {% for message in messages %}
+                <div class="mb-4 flex items-start gap-3 p-4 rounded-lg border-l-4 border-green-500 bg-red-50 shadow-sm">
+                    <div class="text-green-500 mt-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-green-600 mt-0.5">{{ message }}</p>
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="px-2 py-1 rounded bg-white/10 text-purple-200 text-[10px] font-mono uppercase tracking-widest border border-white/5">
+                        Citizen Console v2.0
+                    </span>
+                    <span class="h-1 w-1 rounded-full bg-green-400 animate-pulse"></span>
+                </div>
+                
+                <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">
+                    Welcome, {{ citizen.name }}
+                </h1>
+                
             </div>
+
+            <a href="{% url 'complaints:submit_complaint' %}" class="group relative inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-xl font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 transform hover:-translate-y-1">
+                <span class="text-purple-600 group-hover:scale-110 transition-transform duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
+                </span>
+                <span>Report New Issue</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="relative w-full px-4 md:px-8 -mt-12 pb-12 z-20">
+        
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden min-h-[500px]">
             
-            <!-- Pagination -->
-            {% if pending_complaints.has_other_pages %}
-            <div class="join mt-6 flex justify-center">
-                {% if pending_complaints.has_previous %}
-                <a href="?page=1" class="join-item btn btn-sm">First</a>
-                <a href="?page={{ pending_complaints.previous_page_number }}" class="join-item btn btn-sm">Previous</a>
-                {% endif %}
-                
-                <button class="join-item btn btn-sm btn-active">Page {{ pending_complaints.number }}</button>
-                
-                {% if pending_complaints.has_next %}
-                <a href="?page={{ pending_complaints.next_page_number }}" class="join-item btn btn-sm">Next</a>
-                <a href="?page={{ pending_complaints.paginator.num_pages }}" class="join-item btn btn-sm">Last</a>
-                {% endif %}
+            <div class="border-b border-slate-100 bg-slate-50/50 px-6 pt-2 overflow-x-auto" id="dashboard-tabs">
+                <nav class="flex space-x-6 min-w-max" aria-label="Tabs">
+                    
+                    <a href="?status=reported" class="tab-link group flex items-center py-4 px-1 border-b-2 text-sm font-bold transition-all {% if active_tab == 'reported' %} border-purple-600 text-purple-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 {% endif %}">
+                        Reported
+                        <span class="ml-2 py-0.5 px-2 rounded text-[10px] font-mono font-bold {% if active_tab == 'reported' %} bg-purple-100 text-purple-700 {% else %} bg-slate-200 text-slate-500 {% endif %}">
+                            {{ counts.reported|default:"0" }}
+                        </span>
+                    </a>
+
+                    <a href="?status=assigned" class="tab-link group flex items-center py-4 px-1 border-b-2 text-sm font-bold transition-all {% if active_tab == 'assigned' %} border-blue-500 text-blue-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 {% endif %}">
+                        Assigned
+                        <span class="ml-2 py-0.5 px-2 rounded text-[10px] font-mono font-bold {% if active_tab == 'assigned' %} bg-blue-100 text-blue-700 {% else %} bg-slate-200 text-slate-500 {% endif %}">
+                            {{ counts.assigned|default:"0" }}
+                        </span>
+                    </a>
+
+                    <a href="?status=in_progress" class="tab-link group flex items-center py-4 px-1 border-b-2 text-sm font-bold transition-all {% if active_tab == 'in_progress' %} border-amber-500 text-amber-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 {% endif %}">
+                        In Progress
+                        <span class="ml-2 py-0.5 px-2 rounded text-[10px] font-mono font-bold {% if active_tab == 'in_progress' %} bg-amber-100 text-amber-700 {% else %} bg-slate-200 text-slate-500 {% endif %}">
+                            {{ counts.in_progress|default:"0" }}
+                        </span>
+                    </a>
+
+                    <a href="?status=completed" class="tab-link group flex items-center py-4 px-1 border-b-2 text-sm font-bold transition-all {% if active_tab == 'completed' %} border-emerald-500 text-emerald-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 {% endif %}">
+                        Resolved
+                        <span class="ml-2 py-0.5 px-2 rounded text-[10px] font-mono font-bold {% if active_tab == 'completed' %} bg-emerald-100 text-emerald-700 {% else %} bg-slate-200 text-slate-500 {% endif %}">
+                            {{ counts.completed|default:"0" }}
+                        </span>
+                    </a>
+
+                    <a href="?status=closed" class="tab-link group flex items-center py-4 px-1 border-b-2 text-sm font-bold transition-all {% if active_tab == 'closed' %} border-slate-600 text-slate-800 {% else %} border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300 {% endif %}">
+                        Closed
+                        <span class="ml-2 py-0.5 px-2 rounded text-[10px] font-mono font-bold {% if active_tab == 'closed' %} bg-slate-200 text-slate-800 {% else %} bg-slate-100 text-slate-400 {% endif %}">
+                            {{ counts.closed|default:"0" }}
+                        </span>
+                    </a>
+                </nav>
             </div>
-            {% endif %}
-        {% else %}
-        <div class="alert alert-info">
-            <span>You haven't submitted any complaints yet. <a href="{% url 'complaints:submit_complaint' %}" class="link">Submit one now</a></span>
-        </div>
-        {% endif %}
-    </div>
-    
-    <!-- Divider -->
-    <div class="divider"></div>
-    
-    <!-- Completed Complaints Section -->
-    <div class="mb-12">
-        <h2 class="text-2xl font-bold mb-4">Completed Complaints ({{ completed_count }})</h2>
-        
-        {% if completed_complaints %}
-            <div class="space-y-4">
-                {% for complaint in completed_complaints %}
-                <div class="card bg-base-100 shadow-md">
-                    <div class="card-body">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <h3 class="card-title text-lg">{{ complaint.title }}</h3>
-                                <div class="flex gap-2 mt-2 flex-wrap">
-                                    <span class="badge badge-outline">{{ complaint.get_category_display }}</span>
-                                    <span class="badge {% if complaint.status == 'completed' %}badge-success{% elif complaint.status == 'closed' %}badge-neutral{% endif %}">
-                                        {{ complaint.get_status_display }}
-                                    </span>
+
+            <div class="p-6 md:p-8">
+                {% if page_obj %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up">
+                    {% for complaint in page_obj %}
+                    
+                    <a href="{% url 'users:complaint_status_detail' complaint.id %}" 
+                       class="group relative bg-white rounded-xl border border-slate-200 hover:border-purple-400 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col h-full overflow-hidden block text-left">
+                        
+                        <div class="h-32 bg-slate-100 relative overflow-hidden">
+                            {% if complaint.proof_image %}
+                                <img src="{{ complaint.proof_image.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-slate-300 text-xs font-mono">
+                                    [NO_IMAGE_DATA]
                                 </div>
-                                <p class="text-xs text-gray-600 mt-2">
-                                    <strong>Officer:</strong> {{ complaint.officer.name }}
-                                </p>
-                                {% if complaint.contractor %}
-                                <p class="text-xs text-gray-600">
-                                    <strong>Contractor:</strong> {{ complaint.contractor.name }}
-                                </p>
-                                {% endif %}
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Completed: {{ complaint.updated_at|date:"M d, Y" }}
-                                </p>
+                            {% endif %}
+                            
+                            <div class="absolute top-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] font-mono px-2 py-1 rounded">
+                                {{ complaint.created_at|date:"M d" }}
                             </div>
-                            <a href="{% url 'users:complaint_status_detail' complaint.id %}" class="btn btn-ghost btn-sm">
-                                View Timeline
-                            </a>
                         </div>
+
+                        <div class="p-5 flex-1 flex flex-col">
+                            <h3 class="font-bold text-slate-800 mb-1 group-hover:text-purple-600 transition-colors line-clamp-1">
+                                {{ complaint.title }}
+                            </h3>
+                            
+                            <p class="text-slate-500 text-xs line-clamp-2 mb-4">
+                                {{ complaint.description }}
+                            </p>
+
+                            <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-3">
+                                <span class="text-[10px] font-mono uppercase text-slate-400 bg-slate-50 px-2 py-1 rounded">
+                                    #{{ complaint.id }}
+                                </span>
+                                
+                                <span class="text-xs font-bold uppercase tracking-wider
+                                    {% if complaint.status == 'reported' %}text-purple-600
+                                    {% elif complaint.status == 'assigned' %}text-blue-600
+                                    {% elif complaint.status == 'in_progress' %}text-amber-600
+                                    {% elif complaint.status == 'completed' %}text-emerald-600
+                                    {% else %}text-slate-500{% endif %}">
+                                    {{ complaint.get_status_display }}
+                                </span>
+                            </div>
+
+                            <div class="mt-3 text-right h-4 overflow-hidden">
+                                <span class="text-xs font-bold text-indigo-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 block">
+                                    View Details &rarr;
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-12 flex justify-center">
+                    <div class="join shadow-sm">
+                        {% if page_obj.has_previous %}
+                        <a href="?status={{ active_tab }}&page={{ page_obj.previous_page_number }}" class="tab-link join-item btn btn-sm bg-white border-slate-200">«</a>
+                        {% endif %}
+                        <button class="join-item btn btn-sm bg-slate-100 text-slate-600 border-slate-200 pointer-events-none">Page {{ page_obj.number }}</button>
+                        {% if page_obj.has_next %}
+                        <a href="?status={{ active_tab }}&page={{ page_obj.next_page_number }}" class="tab-link join-item btn btn-sm bg-white border-slate-200">»</a>
+                        {% endif %}
                     </div>
                 </div>
-                {% endfor %}
+
+                {% else %}
+                <div class="text-center py-20">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    </div>
+                    <h3 class="text-slate-800 font-bold">No {{ active_tab|title }} Items</h3>
+                    <p class="text-slate-500 text-sm mt-1">Check other tabs or report a new issue.</p>
+                    <a href="{% url 'complaints:submit_complaint' %}" class="inline-block mt-4 text-purple-600 font-bold text-sm hover:underline">
+                        File a Report Now &rarr;
+                    </a>
+                </div>
+                {% endif %}
             </div>
-        {% else %}
-        <div class="alert alert-info">
-            <span>No completed complaints yet.</span>
+
         </div>
-        {% endif %}
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Check if we have a saved position
+        const scrollPos = sessionStorage.getItem('dashboardScrollPos');
+        if (scrollPos) {
+            window.scrollTo(0, parseInt(scrollPos));
+            sessionStorage.removeItem('dashboardScrollPos'); // Clear it
+        }
+
+        // 2. Add click listeners to Tabs and Pagination
+        const links = document.querySelectorAll('.tab-link');
+        links.forEach(link => {
+            link.addEventListener('click', function() {
+                // Save the current vertical scroll position
+                sessionStorage.setItem('dashboardScrollPos', window.scrollY);
+            });
+        });
+    });
+</script>
 {% endblock %}
+

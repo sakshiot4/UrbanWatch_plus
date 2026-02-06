@@ -5,67 +5,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}UrbanWatch+{% endblock %}</title>
-    {% tailwind_css %}
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Essential custom classes */
+        .clip-path-slant {
+            clip-path: polygon(0 40%, 100% 0%, 100% 100%, 0% 100%);
+        }
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-base-200">
-    <!-- Navbar -->
-    <div class="navbar bg-primary text-primary-content">
-        <div class="flex-1">
-            <a href="/" class="btn btn-ghost text-xl">UrbanWatch+</a>
-        </div>
-        <div class="flex-none gap-2">
-            {% if user.is_authenticated %}
-                {% if user.officer_profile %}
-                    <!-- Officer Links -->
-                    <a href="{% url 'officers:dashboard' %}" class="btn btn-sm">Officer Dashboard</a>
-                {% elif user.contractor_profile %}
-                    <!-- Contractor Links -->
-                    <a href="{% url 'contractors:contractor_dashboard' %}" class="btn btn-sm">Contractor Dashboard</a>
-                {% else %}
-                    <!-- Citizen Links -->
-                    <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-sm">Submit Complaint</a>
-                    <a href="{% url 'users:citizen_dashboard' %}" class="btn btn-sm btn-ghost">My Complaints</a>
-                {% endif %}
 
-                <!-- Logout Dropdown -->
-                <div class="dropdown dropdown-end">
-                    <label tabindex="0" class="btn btn-ghost btn-circle avatar placeholder">
-                        <div class="bg-neutral-focus text-neutral-content rounded-full w-10">
-                            <span class="text-xl">{{ user.username|first|upper }}</span>
-                        </div>
-                    </label>
-                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 text-base-content">
-                        <li><span>{{ user.username }}</span></li>
-                        <li><a href="{% url 'account_logout' %}">Logout</a></li>
-                    </ul>
-                </div>
-            {% else %}
-                <a href="{% url 'account_login' %}" class="btn btn-sm">Login</a>
-            {% endif %}
-        </div>
+<body class="overflow-x-hidden font-sans text-slate-600 bg-gray-50 min-h-screen flex flex-col">
+
+  <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity opacity-0"></div>
+
+  <aside id="sidebar" class="fixed top-0 right-0 h-full w-80 glass-sidebar shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-l border-white/20">
+    <div class="p-6 flex justify-between items-center border-b border-gray-200">
+      <span class="text-xl font-bold text-teal-800">Menu</span>
+      <button onclick="toggleSidebar()" class="text-gray-500 hover:text-red-500 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
 
-    <!-- Messages -->
-   {% block messages %} {% if messages %}
-        <div class="container mx-auto px-4 mt-4">
+    <div class="p-6 overflow-y-auto grow space-y-8">
+      <div>
+        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Citizen Access</h4>
+        <ul class="space-y-4">
+          <li><a href="/" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Home</a></li>
+          <li><a href="#about" onclick="toggleSidebar()" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">About</a></li>
+          {% if user.is_authenticated %}
+          <li><a href="{% url 'account_logout' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Logout</a></li>
+          {% else %}
+          <li><a href="{% url 'account_login' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Login</a></li>
+          <li><a href="{% url 'account_signup' %}" class="text-lg font-bold text-purple-600 block">Register Account</a></li>
+        {% endif %}
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <div class="bg-gradient-to-br from-purple-100 to-purple-300 relative min-h-screen flex flex-col">
+
+    <div class="absolute top-0 left-0 transform translate-x-6 translate-y-4 pointer-events-none fixed">
+      <div class="absolute w-64 h-64 rounded-full opacity-50 bg-gradient-to-br from-teal-100 to-teal-200"></div>
+      <div class="absolute w-64 h-64 mt-10 ml-10 rounded-full opacity-50 bg-gradient-to-br from-purple-100 to-purple-200"></div>
+    </div>
+    <div class="absolute top-0 right-0 hidden mr-48 transform -translate-x-64 translate-y-64 lg:block pointer-events-none fixed">
+      <div class="absolute w-64 h-64 rounded-full bg-gradient-to-br from-teal-100 to-teal-200"></div>
+    </div>
+
+    <nav class="sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-white/40 shadow-sm flex-none">
+      <div class="container flex justify-between items-center px-6 py-4 mx-auto">
+        <a href="/" class="text-3xl font-bold text-teal-700 tracking-tight">
+          UrbanWatch<span class="text-purple-600">+</span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-8">
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'account_logout' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Logout</a></li>
+            <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
+            {% else %}
+          <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
+          <a href="{% url 'account_login' %}" class="text-gray-700 font-bold hover:text-purple-700 transition">Login</a>
+          <a href="{% url 'account_signup' %}" class="px-6 py-2 bg-purple-700 text-white font-bold rounded-full shadow-lg hover:bg-purple-800 transition transform hover:-translate-y-0.5">
+            Register
+          </a>
+          {% endif %}
+        </div>
+
+        <button onclick="toggleSidebar()" class="md:hidden p-2 text-teal-900">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 relative z-10 flex-grow">
+        {% comment %} {% if messages %}
+        <div class="max-w-4xl mx-auto mb-6">
             {% for message in messages %}
-            <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %} shadow-lg mb-2">
-                <div>
-                    {% if message.tags == 'error' %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {% elif message.tags == 'success' %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {% endif %}
-                    <span>{{ message }}</span>
-                </div>
+            <div class="p-4 mb-2 rounded-lg shadow-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ message }}
             </div>
             {% endfor %}
         </div>
-    {% endif %} {% endblock %}
+        {% endif %} {% endcomment %}
 
-    <!-- Content -->
-    <main class="container mx-auto px-4 py-8">
         {% block content %}{% endblock %}
     </main>
+    {% include 'footer.html' %}
+
+  </div> <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const isHidden = sidebar.classList.contains('translate-x-full');
+
+      if (isHidden) {
+        sidebar.classList.remove('translate-x-full');
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.add('opacity-100'), 10);
+      } else {
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.remove('opacity-100');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+      }
+    }
+  </script>
 </body>
 </html>

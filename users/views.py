@@ -2,18 +2,21 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Count  # NEEDED FOR BADGE COUNTS
 
 from complaints.models import Complaint
 from .models import Citizen
 
-@login_required
+
+
+"""@login_required
 def citizen_dashboard(request):
-    """Citizen dashboard showing their submitted complaints."""
+    #Citizen dashboard showing their submitted complaints.
     try:
         citizen = Citizen.objects.get(user = request.user)
     except Citizen.DoesNotExist:
         messages.error(request, "Citizen profile not found.")
-        return redirect('home')
+        return redirect('account_sign')
     
     #get all complaints submitted by this citizen.
     all_complaints = Complaint.objects.filter(citizen = citizen).select_related('officer', 'contractor').order_by('-created_at')
@@ -24,7 +27,7 @@ def citizen_dashboard(request):
     completed_complaints = all_complaints.filter(status__in = ['completed', 'closed'])
 
     #Pagination
-    paginator = Paginator(pending_complaints, 10)
+    paginator = Paginator(pending_complaints, 5)
     page = request.GET.get('page')
     pending_page = paginator.get_page(page)
 
@@ -39,7 +42,59 @@ def citizen_dashboard(request):
 
     return render(request, 
                   "users/citizen_dashboard.html",
-                    context)
+                    context)"""
+
+
+@login_required
+def citizen_dashboard(request):
+    """
+    Citizen dashboard with Tabs, Badges, and Pagination.
+    """
+    # --- 1. GET CITIZEN PROFILE (With Security Check) ---
+    try:
+        citizen = Citizen.objects.get(user=request.user)
+    except Citizen.DoesNotExist:
+        # Security: If a contractor tries to access this page, send them away
+        if hasattr(request.user, 'contractor_profile'):
+             return redirect('contractors:dashboard')
+        
+        messages.error(request, "Citizen profile not found. Please complete signup.")
+        return redirect('account_signup')
+
+    # --- 2. BASE QUERY (Optimized) ---
+    # Fetch all complaints for this user, pre-fetching related data to avoid lag
+    base_qs = Complaint.objects.filter(citizen=citizen).select_related('officer', 'contractor').order_by('-created_at')
+
+    # 3. Get Counts for Badges
+    # Result: {'reported': 5, 'closed': 12, ...}
+    db_counts = base_qs.values('status').annotate(count=Count('status'))
+    counts = {item['status']: item['count'] for item in db_counts}
+
+    # --- 4. HANDLE TAB FILTERING ---
+    # Get the active tab from the URL, default to 'reported' if nothing clicked
+    active_tab = request.GET.get('status', 'reported')
+
+    if active_tab == 'all':
+        complaints_list = base_qs
+    else:
+        # Filter the list to show ONLY what matches the tab
+        complaints_list = base_qs.filter(status=active_tab)
+
+    # --- 5. PAGINATION ---
+    # Show 6 items per page so the dashboard isn't endless
+    paginator = Paginator(complaints_list, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'citizen': citizen,
+        'page_obj': page_obj,       # The filtered, paginated list
+        'active_tab': active_tab,   # To highlight the correct tab in CSS
+        'counts': counts,           # The numbers for the badges
+        'total_count': base_qs.count() # Total stats if needed
+    }
+
+    return render(request, "users/citizen_dashboard.html", context)
 
 @login_required
 def complaint_status_detail(request, complaint_id):

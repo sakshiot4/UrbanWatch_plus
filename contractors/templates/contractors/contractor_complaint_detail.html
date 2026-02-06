@@ -1,180 +1,277 @@
 {% extends "base.html" %}
 
-{% block title %}Work Details{% endblock %}
+{% block title %}Work Order #{{ complaint.id }} - UrbanWatch+{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-6">
-    <!-- Back Button -->
-    <a href="{% url 'contractors:contractor_dashboard' %}" class="btn btn-ghost btn-sm mb-4">← Back to Dashboard</a>
-    
-    <!-- Main Card -->
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <!-- Title & Status -->
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h2 class="card-title text-3xl">{{ complaint.title }}</h2>
-                    <p class="text-sm text-gray-600">ID: {{ complaint.id }}</p>
-                </div>
-                <span class="badge {% if complaint.status == 'assigned' %}badge-warning{% elif complaint.status == 'in_progress' %}badge-info{% elif complaint.status == 'completed' %}badge-success{% else %}badge-neutral{% endif %} badge-lg">
-                    {{ complaint.get_status_display }}
-                </span>
-            </div>
-            
-            <!-- Category, Region, Location -->
-            <div class="divider"></div>
-            <div class="grid grid-cols-3 gap-4 mb-6">
-                <div>
-                    <p class="text-xs text-gray-500 uppercase">Category</p>
-                    <p class="font-semibold">{{ complaint.get_category_display }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 uppercase">Region</p>
-                    <p class="font-semibold">{{ complaint.get_region_display }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 uppercase">Location</p>
-                    <p class="font-semibold">{{ complaint.location }}</p>
-                </div>
-            </div>
-            
-            <!-- Description -->
-            <div class="divider"></div>
-            <div class="mb-6">
-                <h3 class="font-semibold mb-2">Description</h3>
-                <p class="text-gray-700 leading-relaxed">{{ complaint.description }}</p>
-            </div>
-            
-            <!-- Proof Image (if exists) and Work Validition -->
-            <div class="divider">Work Verification</div>
+<div class="min-h-screen bg-slate-50 pb-12 lg:-m-8 -m-4 -mt-8 -mb-8">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="card bg-base-100 shadow border border-base-200">
-                        <figure class="px-4 pt-4">
-                            {% if complaint.proof_image %}
-                                <img src="{{ complaint.proof_image.url }}" alt="Before" class="rounded-xl h-64 object-cover w-full">
-                            {% else %}
-                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">No Image</div>
-                            {% endif %}
-                        </figure>
-                        <div class="card-body p-4 text-center">
-                            <h3 class="font-bold text-gray-500">BEFORE (Reported)</h3>
-                        </div>
-                    </div>
-
-                    <div class="card bg-base-100 shadow border {% if complaint.status == 'completed' %}border-success{% else %}border-base-200{% endif %}">
-                        <figure class="px-4 pt-4">
-                            {% if complaint.completion_image %}
-                                <img src="{{ complaint.completion_image.url }}" alt="After" class="rounded-xl h-64 object-cover w-full">
-                            {% else %}
-                                <div class="h-64 w-full bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">
-                                    Pending Upload
-                                </div>
-                            {% endif %}
-                        </figure>
-                        <div class="card-body p-4 text-center">
-                            <h3 class="font-bold {% if complaint.status == 'completed' %}text-success{% else %}text-gray-500{% endif %}">
-                                AFTER (Proof)
-                            </h3>
-                        </div>
-                    </div>
-                </div>
-                            
-            
-            <!-- Citizen Details -->
-            <div class="divider"></div>
-            <div class="bg-base-200 p-4 rounded-lg mb-6">
-                <h3 class="font-semibold mb-2">Citizen Information</h3>
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <p class="text-gray-600">Name</p>
-                        <p class="font-semibold">{{ complaint.citizen.name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Email</p>
-                        <p class="font-semibold">{{ complaint.citizen.user.email }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Phone</p>
-                        <p class="font-semibold">{{ complaint.citizen.phone|default:"Not provided" }}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Officer Details -->
-            <div class="divider"></div>
-            <div class="bg-base-200 p-4 rounded-lg mb-6">
-                <h3 class="font-semibold mb-2">Assigned Officer</h3>
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <p class="text-gray-600">Name</p>
-                        <p class="font-semibold">{{ complaint.officer.name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Email</p>
-                        <p class="font-semibold">{{ complaint.officer.email }}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Timestamps -->
-            <div class="divider"></div>
-            <div class="grid grid-cols-2 gap-4 text-sm mb-6">
-                <div>
-                    <p class="text-gray-600">Submitted On</p>
-                    <p class="font-semibold">{{ complaint.created_at|date:"M d, Y H:i" }}</p>
-                </div>
-                <div>
-                    <p class="text-gray-600">Last Updated</p>
-                    <p class="font-semibold">{{ complaint.updated_at|date:"M d, Y H:i" }}</p>
-                </div>
-            </div>
-            
-            {% if complaint.officer_feedback and complaint.status == 'in_progress' %}
-                <div class="alert alert-warning shadow-lg mb-6 border-l-4 border-warning">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                    <div>
-                        <h3 class="font-bold text-lg">⚠️ Officer Feedback (Action Required)</h3>
-                        <p class="py-2 italic">"{{ complaint.officer_feedback }}"</p>
-                        <div class="text-xs opacity-75">Please redo the work based on this feedback and upload a new photo.</div>
-                    </div>
-                </div>
-            {% endif %} 
-
-            <!-- Status Update Section (only if active) -->
-            {% if status_form %}
-            <div class="divider"></div>
-            <div class="mb-6">
-                <h3 class="font-semibold mb-3">Update Work Status</h3>
-
-                <form method="post" enctype="multipart/form-data" action="{% url 'contractors:contractor_update_status' complaint.id %}" class="space-y-3">
-                    {% csrf_token %}
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Mark work as:</span>
-                        </label>
-                        {{ status_form.status }}
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Proof of Completion (Required if completing):</span>
-                        </label>
-                        {{ status_form.completion_image }}
-                    </div>
+    <div class="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 pt-8 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden shadow-xl">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
         
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        Update Status
-                    </button>
-                </form>
+        <div class="relative max-w-7xl mx-auto z-10">
+            <a href="{% url 'contractors:contractor_dashboard' %}" class="inline-flex items-center text-slate-400 hover:text-white mb-6 text-xs font-bold uppercase tracking-widest transition-colors group">
+                <span class="group-hover:-translate-x-1 transition-transform mr-2">&larr;</span> Back to  <strong>Dashboard</strong>
+            </a>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="px-2 py-0.5 rounded bg-teal-500/20 border border-teal-500/50 text-teal-300 text-[10px] font-mono uppercase tracking-widest">
+                            Work Order
+                        </span>
+                        <span class="font-mono text-slate-400 opacity-60">#{{ complaint.id }}</span>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">{{ complaint.title }}</h1>
+                </div>
+
+                <div class="flex flex-col items-end">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current Status</span>
+                    <span class="px-5 py-2 rounded-lg text-sm font-bold uppercase tracking-wide border shadow-lg backdrop-blur-md flex items-center gap-2
+                        {% if complaint.status == 'assigned' %} bg-amber-500/20 border-amber-500/50 text-amber-300
+                        {% elif complaint.status == 'in_progress' %} bg-blue-500/20 border-blue-500/50 text-blue-300
+                        {% elif complaint.status == 'completed' %} bg-emerald-500/20 border-emerald-500/50 text-emerald-300
+                        {% else %} bg-slate-500/20 border-slate-500/50 text-slate-300 {% endif %}">
+                        
+                        {% if complaint.status == 'in_progress' %}
+                            <span class="relative flex h-2 w-2 mr-1">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            </span>
+                        {% endif %}
+                        {{ complaint.get_status_display }}
+                    </span>
+                </div>
             </div>
-            {% else %}
-            <div class="divider"></div>
-            <div class="alert alert-info">
-                <span>This work is {{ complaint.get_status_display|lower }}. No further updates available.</span>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-2 space-y-8">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Incident Report
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-wrap gap-3 mb-6">
+                            <div class="px-3 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2 border border-slate-200">
+                                <span class="text-slate-400 uppercase text-[10px]">Category:</span>
+                                {{ complaint.get_category_display }}
+                            </div>
+                            <div class="px-3 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2 border border-slate-200">
+                                <span class="text-slate-400 uppercase text-[10px]">Region:</span>
+                                {{ complaint.get_region_display }}
+                            </div>
+                            <div class="px-3 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2 border border-slate-200">
+                                <span class="text-slate-400 uppercase text-[10px]">Loc:</span>
+                                {{ complaint.location }}
+                            </div>
+                        </div>
+
+                        <p class="text-slate-700 text-lg leading-relaxed border-l-4 border-slate-200 pl-4">
+                            {{ complaint.description }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-200">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Visual Verification
+                        </h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="p-4 border-b md:border-b-0 md:border-r border-slate-100">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-slate-400 uppercase">Current State</span>
+                                <span class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded">BEFORE</span>
+                            </div>
+                            <div class="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 relative group">
+                                {% if complaint.proof_image %}
+                                    <img src="{{ complaint.proof_image.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onclick="window.open(this.src)">
+                                {% else %}
+                                    <div class="flex flex-col items-center justify-center h-full text-slate-400">
+                                        <span class="text-xs font-semibold">No Image Provided</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50/50">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-slate-400 uppercase">Completion Proof</span>
+                                {% if complaint.status == 'completed' or complaint.status == 'closed' %}
+                                    <span class="bg-emerald-100 text-emerald-600 text-[10px] font-bold px-2 py-0.5 rounded">AFTER</span>
+                                {% else %}
+                                    <span class="bg-slate-200 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded">PENDING</span>
+                                {% endif %}
+                            </div>
+                            <div class="aspect-video bg-white rounded-lg overflow-hidden border border-dashed border-slate-300 relative group">
+                                {% if complaint.completion_image %}
+                                    <img src="{{ complaint.completion_image.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onclick="window.open(this.src)">
+                                {% else %}
+                                    <div class="flex flex-col items-center justify-center h-full text-slate-400">
+                                        <div class="w-8 h-8 rounded-full border-2 border-slate-300 flex items-center justify-center mb-2">
+                                            <span class="font-bold text-lg text-slate-300">?</span>
+                                        </div>
+                                        <span class="text-xs font-semibold">Upload Pending</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            {% endif %}
+
+            <div class="space-y-6">
+
+                {% if complaint.officer_feedback and complaint.status == 'in_progress' %}
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm animate-pulse">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0-6a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"></path></svg>
+                        <h3 class="text-sm font-bold text-amber-800 uppercase tracking-wide">Correction Required</h3>
+                    </div>
+                    <p class="text-sm text-amber-900 italic mb-2">"{{ complaint.officer_feedback }}"</p>
+                </div>
+                {% endif %}
+
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-800 px-5 py-3 border-b border-slate-700 flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></div>
+                        <h3 class="text-xs font-bold text-white uppercase tracking-widest">Operations Console</h3>
+                    </div>
+
+                    <div class="p-5">
+                        {% if status_form %}
+                            <form method="post" enctype="multipart/form-data" action="{% url 'contractors:contractor_update_status' complaint.id %}" class="space-y-5">
+                                {% csrf_token %}
+                                
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Work Status</label>
+                                    {{ status_form.status }}
+                                </div>
+
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 flex justify-between">
+                                        Proof Image
+                                        <span class="text-red-400 text-[10px] normal-case">*Required to finish</span>
+                                    </label>
+                                    {{ status_form.completion_image }}
+                                </div>
+            
+                                <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold shadow-lg shadow-teal-500/30 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    Update Status
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <p class="text-sm font-bold text-slate-700">Ticket Closed</p>
+                                <p class="text-xs text-slate-500 mt-1">Status locked by system.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Stakeholder Contact</h3>
+                    
+                    <div class="flex lg:flex-col gap-4 overflow-x-auto pb-4 lg:pb-0 snap-x snap-mandatory -mx-4 px-4 lg:mx-0 lg:px-0 no-scrollbar">
+                        
+                        <div class="min-w-[85%] sm:min-w-[300px] lg:min-w-full snap-center bg-white rounded-xl shadow-sm border border-slate-200 p-4 border-l-4 border-l-indigo-400">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-xs">C</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Citizen Reporter</h4>
+                                    <p class="text-[10px] text-slate-400 uppercase">On-Site Contact</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1 text-sm mb-3">
+                                <p class="font-semibold text-slate-700">{{ complaint.citizen.name }}</p>
+                                <p class="font-mono text-slate-500 text-xs">{{ complaint.citizen.phone|default:"Phone hidden" }}</p>
+                            </div>
+                            {% if complaint.citizen.phone %}
+                                <a href="tel:{{ complaint.citizen.phone }}" class="block w-full py-1.5 bg-indigo-50 text-indigo-700 text-center rounded text-xs font-bold hover:bg-indigo-100 transition-colors">
+                                    Call Citizen
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <div class="min-w-[85%] sm:min-w-[300px] lg:min-w-full snap-center bg-white rounded-xl shadow-sm border border-slate-200 p-4 border-l-4 border-l-slate-400">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs">O</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Assigned Officer</h4>
+                                    <p class="text-[10px] text-slate-400 uppercase">Approver</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1 text-sm mb-3">
+                                <p class="font-semibold text-slate-700">{{ complaint.officer.name }}</p>
+                                <p class="font-mono text-slate-500 text-xs">{{ complaint.officer.email }}</p>
+                            </div>
+                            <a href="mailto:{{ complaint.officer.email }}" class="block w-full py-1.5 bg-slate-100 text-slate-600 text-center rounded text-xs font-bold hover:bg-slate-200 transition-colors">
+                                Email Officer
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Timeline</h3>
+                    <div class="space-y-4">
+                        <div class="flex gap-3">
+                            <div class="w-2 h-2 rounded-full bg-slate-300 mt-1"></div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-700">Ticket Created</p>
+                                <p class="text-[10px] font-mono text-slate-400">{{ complaint.created_at|date:"M d, H:i" }}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="w-2 h-2 rounded-full bg-teal-400 mt-1"></div>
+                            <div>
+                                <p class="text-xs font-bold text-teal-700">Last Activity</p>
+                                <p class="text-[10px] font-mono text-slate-400">{{ complaint.updated_at|date:"M d, H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
     </div>
 </div>
+
+<style>
+    /* Custom Scrollbar Hiding for Swipe Area */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    /* Form Styles */
+    select {
+        width: 100%; padding: 0.6rem; border-radius: 0.5rem;
+        border: 1px solid #cbd5e1; background-color: #fff; font-size: 0.875rem; color: #334155;
+    }
+    select:focus { outline: none; border-color: #0d9488; ring: 2px solid #ccfbf1; }
+    
+    input[type="file"] { width: 100%; font-size: 0.75rem; }
+    input[type="file"]::file-selector-button {
+        background-color: #f1f5f9; border: 0; border-right: 1px solid #e2e8f0;
+        padding: 0.5rem 1rem; color: #475569; font-weight: 700; margin-right: 1rem; cursor: pointer;
+    }
+</style>
 {% endblock %}

@@ -1,0 +1,21 @@
+<div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+    <div class="bg-slate-50 border-b border-slate-100 px-6 py-4"><h3 class="font-bold text-slate-800">Evidence</h3></div>
+    <div class="grid grid-cols-1 md:grid-cols-2">
+        <div class="p-6 border-b md:border-b-0 md:border-r border-slate-100">
+            <span class="text-xs font-bold text-slate-400 uppercase">Before</span>
+            <div class="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 mt-2">
+                {% if complaint.proof_image %}
+                    <img src="{{ complaint.proof_image.url }}" class="w-full h-full object-cover">
+                {% else %}<div class="w-full h-full flex items-center justify-center text-xs text-slate-400">NO IMAGE</div>{% endif %}
+            </div>
+        </div>
+        <div class="p-6 bg-slate-50/50">
+            <span class="text-xs font-bold text-slate-400 uppercase">After</span>
+            <div class="aspect-video bg-white rounded-lg overflow-hidden border border-slate-200 mt-2">
+                {% if complaint.completion_image %}
+                    <img src="{{ complaint.completion_image.url }}" class="w-full h-full object-cover">
+                {% else %}<div class="w-full h-full flex items-center justify-center text-xs text-slate-400 font-bold opacity-50">WORK IN PROGRESS</div>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>

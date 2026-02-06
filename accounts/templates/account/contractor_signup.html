@@ -1,131 +1,203 @@
 {% extends "base.html" %}
 
-{% block title %}Contractor Sign Up{% endblock %}
+{% block title %}Contractor Sign Up - UrbanWatch+{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-base-200 py-8">
-    <div class="card w-full max-w-md shadow-xl bg-base-100">
-        <div class="card-body">
-            <h2 class="card-title text-2xl mb-2">Contractor Sign Up</h2>
-            <p class="text-sm text-gray-600 mb-6">Register to accept work (pending officer approval)</p>
+<div class="min-h-screen flex items-center justify-center bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 relative z-20">
+
+    <div class="bg-white p-6 md:p-10 rounded-xl shadow-xl w-full max-w-7xl border border-gray-200 animate-fade-in">
+        
+        <div class="mb-8 text-center border-b border-gray-100 pb-6">
             
-            <form method="post" class="space-y-4">
-                {% csrf_token %}
-                
-                <!-- Username -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Username</span>
-                    </label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                        <span class="text-error text-sm">{{ form.username.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Email -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Email</span>
-                    </label>
-                    {{ form.email }}
-                    {% if form.email.errors %}
-                        <span class="text-error text-sm">{{ form.email.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Full Name -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Full Name</span>
-                    </label>
-                    {{ form.name }}
-                </div>
-                
-                <!-- Company Name -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Company Name</span>
-                    </label>
-                    {{ form.company_name }}
-                </div>
-                
-                <!-- Phone -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Phone</span>
-                    </label>
-                    {{ form.phone }}
-                    {% if form.phone.errors %}
-                        <span class="text-error text-sm">{{ form.phone.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Specialization -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Specialization</span>
-                    </label>
-                    {{ form.specialization }}
-                </div>
-                
-                <!-- Region -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Region</span>
-                    </label>
-                    {{ form.region }}
-                </div>
-                
-                <!-- License Number -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">License Number</span>
-                    </label>
-                    {{ form.license_number }}
-                </div>
-                
-                <!-- Password -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Password</span>
-                    </label>
-                    {{ form.password1 }}
-                    {% if form.password1.errors %}
-                        <span class="text-error text-sm">{{ form.password1.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Confirm Password -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text font-semibold">Confirm Password</span>
-                    </label>
-                    {{ form.password2 }}
-                    {% if form.password2.errors %}
-                        <span class="text-error text-sm">{{ form.password2.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Submit -->
-                <button type="submit" class="btn btn-primary btn-block mt-6">
-                    Create Account
-                </button>
-            </form>
-            
-            <!-- Links -->
-            <div class="mt-6 space-y-3 pt-4 border-t border-gray-300">
-                <p class="text-sm text-center text-gray-600">
-                    Already have an account?
-                    <a href="{% url 'account_login' %}" class="link link-primary">Login</a>
-                </p>
-                
-                <p class="text-sm text-center text-gray-600">
-                    Are you a citizen?
-                    <a href="{% url 'account_signup' %}" class="link link-secondary">Sign up here</a>
-                </p>
+            <div class="inline-block bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 border border-teal-100">
+                Partner Portal
+            </div>
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Contractor Registration</h2>
+            <p class="text-slate-500 text-sm mt-2">Register your company to accept municipal work orders.</p>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm flex items-start gap-2">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
             </div>
         </div>
+        {% endif %}
+        
+        <form method="post" class="space-y-8 md:space-y-6" novalidate> {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
+                
+                <div class="space-y-5 md:col-span-4 border-b md:border-b-0 md:border-r border-slate-100 pb-8 md:pb-0 md:pr-8">
+                    <h3 class="text-xs font-bold text-purple-600 uppercase tracking-widest border-b border-purple-100 pb-2 mb-4">
+                        Login Credentials
+                    </h3>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Username <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">⚠ {{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                            Email Address <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="text-red-500 text-xs mt-1 flex items-center gap-1">⚠ {{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                Password <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.password1.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                Confirm <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.password2.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-5 md:col-span-8">
+                    <h3 class="text-xs font-bold text-teal-600 uppercase tracking-widest border-b border-teal-100 pb-2 mb-4">
+                        Business Profile
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                Full Name <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                Company Name <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.company_name }}
+                            {% if form.company_name.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.company_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                Phone Number <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.phone.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                License No. <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.license_number }}
+                            {% if form.license_number.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.license_number.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                Operating Region <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.region }}
+                            {% if form.region.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.region.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block mb-1.5 font-bold text-gray-500 uppercase text-[10px] tracking-widest">
+                                Specialization <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.specialization }}
+                            {% if form.specialization.errors %}
+                                <p class="text-red-500 text-xs mt-1">⚠ {{ form.specialization.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-100">
+                <button type="submit" class="block w-full md:w-auto md:px-16 mx-auto bg-slate-900 hover:bg-teal-600 text-white font-bold p-4 rounded-lg shadow-lg hover:shadow-xl transition-all transform active:scale-95 text-sm uppercase tracking-widest">
+                    Submit Application
+                </button>
+                <p class="text-center text-xs text-gray-400 mt-3">Account subject to officer verification.</p>
+            </div>
+        </form>
+        
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+            <p class="text-sm text-gray-500 mb-4">Already have an account?</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="{% url 'account_login' %}" class="px-6 py-2 border border-gray-200 rounded-full text-gray-600 font-bold text-xs uppercase tracking-wide hover:bg-gray-50 hover:text-purple-600 transition-colors">
+                    Login Here
+                </a>
+                <a href="{% url 'account_signup' %}" class="px-6 py-2 border border-purple-100 bg-purple-50/50 rounded-full text-purple-700 font-bold text-xs uppercase tracking-wide hover:bg-purple-100 transition-colors">
+                    Citizen Sign Up
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<style>
+    /* Base Input Style */
+    input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select, textarea {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #F9FAFB;
+        border: 1px solid #D1D5DB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #1F2937;
+        transition: all 0.2s;
+    }
+
+    /* Focus State */
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #0D9488; /* Teal-600 */
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+
+    /* Placeholder Styling */
+    ::placeholder {
+        color: #9CA3AF;
+        font-size: 0.8rem;
+    }
+</style>
 {% endblock %}

@@ -1,0 +1,6 @@
+{% if complaint.tracking_token %}
+<div class="bg-indigo-50 rounded-xl border border-indigo-100 p-5">
+    <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Secret Tracking ID</p>
+    <code class="block font-mono text-xs font-bold text-indigo-700 break-all bg-white p-2 rounded border border-indigo-100">{{ complaint.tracking_token }}</code>
+</div>
+{% endif %} 

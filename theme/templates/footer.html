@@ -1,0 +1,65 @@
+<footer class="relative py-10 mt-8 text-slate-600 bg-gradient-to-br from-purple-100 to-purple-300 overflow-hidden border-t border-purple-200">
+
+    <div class="absolute w-32 h-32 -mt-12 rounded-full opacity-40 bg-gradient-to-br from-red-100 to-red-200 blur-2xl"></div>
+    <div class="absolute w-32 h-32 ml-16 -mt-12 rounded-full opacity-40 bg-gradient-to-br from-teal-100 to-teal-200 blur-2xl"></div>
+    <div class="absolute w-48 h-48 bottom-0 right-0 rounded-full opacity-30 bg-gradient-to-br from-purple-200 to-indigo-300 blur-3xl"></div>
+
+    <div class="container relative px-6 mx-auto z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
+            
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg transform -rotate-3">
+                        <span class="text-xl">🏙️</span>
+                    </div>
+                    <h4 class="text-2xl font-black text-slate-800 tracking-tighter">
+                        UrbanWatch<span class="text-purple-600">+</span>
+                    </h4>
+                </div>
+                <p class="text-sm text-slate-700 font-medium max-w-sm">
+                    Citizen-driven infrastructure monitoring. Stay updated on the latest resolved issues in your ward.
+                </p>
+                <form action="#" method="post" class="flex p-1 bg-white/60 backdrop-blur shadow-md rounded-xl border border-white/40 overflow-hidden max-w-xs">
+                    <input type="email" name="email" placeholder="citizen@email.com" 
+                           class="w-full px-4 py-2 text-sm placeholder-slate-400 border-none outline-none bg-transparent text-slate-700 font-medium">
+                    <button class="px-5 py-2 text-sm text-white bg-slate-800 font-bold rounded-lg hover:bg-purple-700 transition-all active:scale-95">
+                        Join
+                    </button>
+                </form>
+            </div>
+
+            <div class="space-y-4">
+                <p class="font-bold tracking-widest text-purple-900/50 uppercase text-[10px]">Quick Access</p>
+                <ul class="space-y-2">
+                    <li><a href="/" class="text-sm text-slate-700 hover:text-purple-900 font-bold transition-colors flex items-center gap-2">Home</a></li>
+                    <li><a href="#" class="text-sm text-slate-700 hover:text-purple-900 font-bold transition-colors flex items-center gap-2">Report Issue</a></li>
+                </ul>
+            </div>
+
+            <div class="space-y-4">
+                <p class="font-bold tracking-widest text-purple-900/50 uppercase text-[10px]">Dashboards</p>
+                <ul class="space-y-2">
+                    <li><a href="{% url 'officers:dashboard' %}" class="text-sm text-slate-700 hover:text-purple-900 font-bold transition-colors">Officer Command</a></li>
+                    <li><a href="{% url 'contractors:contractor_dashboard' %}" class="text-sm text-slate-700 hover:text-purple-900 font-bold transition-colors">Contractor Portal</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between items-center pt-6 mt-10 border-t border-white/30">
+            <div class="text-slate-800 text-[11px] font-mono font-bold tracking-tight">
+                &copy; 2026 UrbanWatch+. CITIZEN-FIRST GOVERNANCE.
+            </div>
+            
+            <div class="flex items-center space-x-6 mt-4 md:mt-0">
+                <a href="#" class="text-slate-700 hover:text-white transition-colors">
+                    <span class="sr-only">Twitter</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                </a>
+                <a href="#" class="text-slate-700 hover:text-white transition-colors">
+                    <span class="sr-only">GitHub</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>

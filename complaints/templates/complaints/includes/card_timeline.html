@@ -1,0 +1,15 @@
+<div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6">
+    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Activity Log</h3>
+    <div class="relative border-l-2 border-slate-100 ml-3 space-y-8">
+        {% for step in timeline %}
+        <div class="relative pl-8">
+            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white shadow-sm {% if step.completed %} bg-purple-600 {% else %} bg-slate-200 {% endif %}"></div>
+            <div>
+                <p class="text-sm font-bold text-slate-800">{{ step.label }}</p>
+                <p class="text-xs text-slate-500">{{ step.description }}</p>
+                {% if step.date %}<p class="text-[10px] font-mono text-slate-400 mt-1">{{ step.date|date:"M d, H:i" }}</p>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>

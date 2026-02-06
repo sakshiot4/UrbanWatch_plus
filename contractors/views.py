@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction #
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 from officers.models import Officer
 from officers.forms import StatusUpdateForm #
@@ -45,28 +46,50 @@ def contractor_dashboard(request):
         return redirect('contractors:application_rejected')
     
     #Active work : assigned or in_progress.
+    # 1. Active: Assigned/In Progress AND (No feedback OR feedback is empty string)
     active_complaints = Complaint.objects.filter(
-        contractor= contractor,
-        status__in = ['assigned', 'in_progress']
-    ).select_related('officer', 'citizen').order_by('-created_at')
+        contractor=contractor,
+        status__in=['assigned', 'in_progress']
+    ).filter(
+        Q(officer_feedback__isnull=True) | Q(officer_feedback="")
+    ).select_related('citizen').order_by('-updated_at')
+
+    # 2. Rejected: In Progress AND (Has feedback AND feedback is NOT empty string)
+    rejected_complaints = Complaint.objects.filter(
+        contractor=contractor,
+        status='in_progress',
+        officer_feedback__isnull=False
+    ).exclude(officer_feedback="").select_related('citizen').order_by('-updated_at')
 
     #Completed work.
-    completed_complaints = Complaint.objects.filter(
+    verification_complaints = Complaint.objects.filter(
         contractor = contractor,
-        status__in = ['completed', 'closed']
-    ).select_related('officer', 'citizen').order_by('-created_at')
+        status__in = ['completed']
+    ).select_related('officer', 'citizen').order_by('-updated_at')
+
+    closed_complaints = Complaint.objects.filter(
+        contractor=contractor,
+        status='closed'
+    ).select_related('officer').order_by('-closed_at')
 
     #paginate active complaints.
-    pagination = Paginator(active_complaints, 10) 
+    pagination = Paginator(active_complaints, 5) 
     page = request.GET.get('page')
     active_page = pagination.get_page(page)
 
     context = {
         'contractor': contractor,
         'active_complaints': active_page,
-        'completed_complaints': completed_complaints,
+        # 'active_complaints': active_complaints,
+        'verification_complaints': verification_complaints,
+        'closed_complaints': closed_complaints,
+        'rejected_complaints': rejected_complaints,
+        
+        # Counts for badges
         'active_count': active_complaints.count(),
-        'completed_count': completed_complaints.count(),
+        'verification_count': verification_complaints.count(),
+        'closed_count': closed_complaints.count(),
+        'rejected_count': rejected_complaints.count(),
     }
 
     return render(request,
@@ -111,90 +134,128 @@ def contractor_update_status(request, complaint_id):
         messages.error(request, "Contractor profile not found.")
         return redirect('home')
     
+    # Lock the row for update to prevent race conditions
     complaint = Complaint.objects.select_for_update().get(id=complaint_id)
-    
-    # Store the current status BEFORE any changes
     current_status = complaint.status
 
-    # Check if the contractor is assigned.
+    # Security Checks
     if complaint.contractor != contractor:
         messages.error(request, "You are not assigned to this complaint.")
         return redirect('contractors:contractor_dashboard')
     
-    # Check if the complaint is in a state contractor can update.
     if complaint.status not in ['assigned', 'in_progress']:
         messages.error(request, "You cannot update the status of this complaint.")
         return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
     
     if request.method == 'POST':
         form = ContractorStatusUpdateForm(request.POST, request.FILES, instance=complaint)
+        
         if form.is_valid():
             new_status = form.cleaned_data['status']
+            uploaded_image = form.cleaned_data.get('completion_image')
 
-            if new_status == current_status:
+            # --- LOGIC FIX: Auto-detect completion ---
+            # If currently 'In Progress' and they upload an image, force status to 'Completed'
+            # (This handles cases where the dropdown/hidden field might still say 'In Progress')
+            if current_status == 'in_progress' and uploaded_image:
+                new_status = 'completed'
+
+            # Check if nothing changed (only if no image was uploaded)
+            if new_status == current_status and not uploaded_image:
                 messages.info(request, "No status change detected.")
-                return redirect(
-                    'contractors:contractor_complaint_detail',
-                    complaint_id=complaint.id
-                )
-
-            #check if the img is uploaded OR if one is alraedy there in DB.
-            has_image = form.cleaned_data['completion_image'] or complaint.completion_image
-
-            if new_status == 'completed' and not has_image:
-                messages.error(request, "⚠️ You must upload a 'Proof of Work' image to mark this as Completed.")
                 return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
 
+            # --- CASE 1: STARTING WORK (Assigned -> In Progress) ---
+            if current_status == 'assigned' and new_status == 'in_progress':
+                complaint = form.save(commit=False)
+                complaint.status = 'in_progress'
+                if not complaint.in_progress_at:
+                    complaint.in_progress_at = timezone.now()
+                complaint.save()
+                messages.success(request, "Work started! Status is now In Progress.")
 
-            # Use current_status (before form), not complaint.status (which may change)
-            if current_status == 'in_progress' and new_status == 'completed':
+            # --- CASE 2: FINISHING WORK (In Progress -> Completed) ---
+            elif current_status == 'in_progress' and new_status == 'completed':
+                
+                # Validation: Image is mandatory for completion
+                has_image = uploaded_image or complaint.completion_image
+                if not has_image:
+                    messages.error(request, "⚠️ You must upload a 'Proof of Work' image to mark this as Completed.")
+                    return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
+
                 complaint = form.save(commit=False)
                 complaint.status = 'completed'
-
-                #set completed_at timesptamp if not already set.
-                if complaint.completed_at is None:
-                    complaint.completed_at = timezone.now()
-
-                complaint.officer_feedback = None
-                    
+                complaint.completed_at = timezone.now()
+                
+                # Clear any previous feedback since they are resubmitting
+                complaint.officer_feedback = None 
+                
                 complaint.save()
-                messages.success(request, "Work marked as completed. Officer will review and close.")
-            else:
-                messages.error(request, f"Invalid status transition: {current_status} -> {new_status}")
-        else:
-            messages.error(request, "There was an error with the form. Please try again.")
+                messages.success(request, "Proof uploaded! Work marked as completed and sent for review.")
 
-    return redirect('contractors:contractor_complaint_detail', complaint_id=complaint_id)
+            # --- CASE 3: INVALID TRANSITION ---
+            else:
+                messages.error(request, f"Invalid status change: Cannot go from {current_status} to {new_status}.")
+
+        else:
+            messages.error(request, "Form error. Please check your inputs.")
+
+    return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
 
 
 
 #for officers to choose contractors for complaints.
+# contractors/views.py
+
+# contractors/views.py
+
 @login_required
 def contractor_list_for_complaint(request, complaint_id):
-    """List contractors for an officer to choose for a specific complaint."""
-
+    """
+    List contractors for an officer to choose for a specific complaint.
+    """
     try:
-        officer = Officer.objects.get(user = request.user)
+        officer = Officer.objects.get(user=request.user)
     except Officer.DoesNotExist:
         messages.error(request, "Officer profile not found.")
         return redirect('home')
     
-    # Ensure the complaint exists
     complaint = get_object_or_404(Complaint, id=complaint_id) 
 
-    #Verify that the officer is assigned to this complaint
     if complaint.officer != officer:
         messages.error(request, "You are not assigned to this complaint.")
         return redirect('officers:officer_dashboard')
     
-    #Get all contractors.
-    contractors = Contractor.objects.all()
+    # --- DEBUGGING PRINTS (Check your terminal!) ---
+    print(f"--- LOOKING FOR CONTRACTORS ---")
+    print(f"Complaint Region: {complaint.region}")
+    print(f"Complaint Category (Speciality): {complaint.category}")
+    
+    # 1. Try finding just by Region first to see if that works
+    region_match = Contractor.objects.filter(region=complaint.region, status='approved').count()
+    print(f"Contractors in this Region (Approved): {region_match}")
+
+    # 2. Try strict matching
+    contractors = Contractor.objects.filter(
+        status='approved',
+        region=complaint.region,
+        specialization=complaint.category 
+    ).order_by('name')
+
+    print(f"Strict Matches Found: {contractors.count()}")
+    print("--------------------------------")
+
+    # Pagination
+    paginator = Paginator(contractors, 10) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
         'officer': officer,
         'complaint': complaint,
-        'contractors': contractors,
+        'contractors': page_obj,
+        'is_paginated': page_obj.has_other_pages,
+        'page_obj': page_obj,
     }
 
-    return render(request, 
-                'contractors/contractor_list_for_complaint.html', context)
+    return render(request, 'contractors/contractor_list_for_complaint.html', context)

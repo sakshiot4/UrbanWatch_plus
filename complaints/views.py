@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 from complaints.models import Complaint
 from .forms import ComplaintForm
@@ -49,7 +50,7 @@ def submit_complaint(request): #this form allows citizens to submit complaints
             # Inside submit_complaint view, after complaint.save()
             messages.success(request, f'Complaint Submitted! Your Tracking ID is: {complaint.tracking_token}')
             print("✅ Form is valid! Redirecting...")
-            return redirect('complaints:submit_success')  #redirect to citizen's complaints page
+            return redirect(f"{reverse('complaints:submit_success')}?token={complaint.tracking_token}")  #redirect to citizen's complaints page
         else:
             print("❌ Form Errors:", form.errors) # This will print to your terminal/console
             messages.error(request, 'Please correct the errors below.')

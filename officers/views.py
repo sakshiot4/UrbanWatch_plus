@@ -15,38 +15,68 @@ from .forms import StatusUpdateForm, ContractorAssignmentForm
 
 @login_required
 def officer_dashboard(request):
-    """Officer dashboard showing region-specific unassigned and assigned complaints"""
     try:
         officer = Officer.objects.get(user=request.user)
     except Officer.DoesNotExist:
         messages.error(request, "Officer profile not found.")
         return redirect('home')
-    
-    # Filter by officer's region
-    unassigned_complaints = Complaint.objects.filter(
-        officer__isnull=True,
-        status='reported',
-        region=officer.region
-    ).select_related('citizen', 'citizen__user').order_by('-created_at')
-    
-    # Paginate unassigned complaints
-    paginator = Paginator(unassigned_complaints, 15)
-    page = request.GET.get('page')
-    unassigned_page = paginator.get_page(page)
-    
-   
-    # My assigned complaints
-    my_complaints = Complaint.objects.filter(
-        officer=officer
-    ).select_related('citizen', 'contractor').order_by('-updated_at')
-    
+
+    # --- 1. TAKE ISSUES (Unassigned in Region) ---
+    unassigned_qs = Complaint.objects.filter(
+        region=officer.region, 
+        officer__isnull=True
+    ).order_by('-created_at')
+    p_take = Paginator(unassigned_qs, 6)
+    page_take = request.GET.get('page_take')
+    take_issues = p_take.get_page(page_take)
+
+    # --- 2. TAKEN ISSUES (Assigned/In Progress) ---
+    taken_qs = Complaint.objects.filter(
+        officer=officer, 
+        status__in=['assigned', 'in_progress']
+    ).select_related('contractor').order_by('-updated_at')
+    p_taken = Paginator(taken_qs, 6)
+    page_taken = request.GET.get('page_taken')
+    taken_issues = p_taken.get_page(page_taken)
+
+    # --- 3. VERIFICATION ISSUES (Completed, Pending Approval) ---
+    verification_qs = Complaint.objects.filter(
+        officer=officer, 
+        status='completed'
+    ).select_related('contractor').order_by('-completed_at')
+    p_verify = Paginator(verification_qs, 6)
+    page_verify = request.GET.get('page_verify')
+    verification_issues = p_verify.get_page(page_verify)
+
+    # --- 4. CLOSED ISSUES (History) ---
+    closed_qs = Complaint.objects.filter(
+        officer=officer, 
+        status='closed'
+    ).order_by('-closed_at')
+    p_closed = Paginator(closed_qs, 6)
+    page_closed = request.GET.get('page_closed')
+    closed_issues = p_closed.get_page(page_closed)
+
+    # Determine which tab should be active after a reload (e.g. clicking pagination)
+    active_tab = 'take'
+    if 'page_taken' in request.GET: active_tab = 'taken'
+    elif 'page_verify' in request.GET: active_tab = 'verify'
+    elif 'page_closed' in request.GET: active_tab = 'closed'
+
     context = {
         'officer': officer,
-        'unassigned_complaints': unassigned_page,
-        'my_complaints': my_complaints,
-        'officer_region': officer.get_region_display(),
+        'take_issues': take_issues,
+        'taken_issues': taken_issues,
+        'verification_issues': verification_issues,
+        'closed_issues': closed_issues,
+        'active_tab': active_tab,
+        
+        # Counts for Badges
+        'count_take': unassigned_qs.count(),
+        'count_taken': taken_qs.count(),
+        'count_verify': verification_qs.count(),
+        'count_closed': closed_qs.count(),
     }
-    
     return render(request, 'officers/dashboard.html', context)
 
 
@@ -93,7 +123,6 @@ def complaint_detail(request, complaint_id):
     
     complaint = get_object_or_404(Complaint, id=complaint_id)
 
-    #Check if the officer is assigned to this complaint or it's unassigned in their region.
     if complaint.officer != officer:
         messages.error(request, "You are not assigned to this complaint.")
         return redirect('officers:dashboard')
@@ -102,12 +131,20 @@ def complaint_detail(request, complaint_id):
     if contractor_id:
         try:
             contractor = Contractor.objects.get(id=contractor_id)
-            complaint.contractor = contractor #for form display only 
+            complaint.contractor = contractor 
         except Contractor.DoesNotExist:
             pass
 
     status_form = StatusUpdateForm(instance=complaint)
+    
+    # --- FILTERED DROPDOWN LOGIC ---
     contractor_form = ContractorAssignmentForm(instance=complaint)
+    # Filter the 'contractor' field queryset based on complaint region and category
+    contractor_form.fields['contractor'].queryset = Contractor.objects.filter(
+        status='approved',
+        region=complaint.region,
+        specialization=complaint.category
+    ).order_by('name')
 
     context = {
             'officer' : officer,
@@ -164,6 +201,7 @@ def update_status(request, complaint_id):
     return redirect('officers:complaint_detail', complaint_id)
 
 @login_required
+@login_required
 def assign_contractor(request, complaint_id):
     """Assign a contractor to the complaint."""
     try:
@@ -179,24 +217,26 @@ def assign_contractor(request, complaint_id):
         return redirect('officers:dashboard')
     
     if request.method == 'POST':
-        #if 'remove contractor' button clicked.
         if 'remove_contractor' in request.POST:
             complaint.contractor = None
-            # move status back
             if complaint.status == 'in_progress' and complaint.can_transition_to('assigned'):
                 complaint.status = 'assigned'
-                #you might set assigned_at here if not set yet.
-                if complaint.assigned_at is None:
-                    complaint.assigned_at = timezone.now()
             complaint.save()
             messages.success(request, "Contractor removed from complaint.")
             return redirect('officers:complaint_detail', complaint_id)
         
         form = ContractorAssignmentForm(request.POST, instance=complaint)
+        
+        # --- APPLY FILTER BEFORE VALIDATION ---
+        form.fields['contractor'].queryset = Contractor.objects.filter(
+            status='approved',
+            region=complaint.region,
+            specialization=complaint.category
+        )
+
         if form.is_valid():
             complaint_obj = form.save(commit=False)
             if complaint_obj.contractor:
-                #Auto set status to in_progress when contractor assigned.
                 if complaint_obj.can_transition_to('in_progress'):
                     complaint_obj.status = 'in_progress'
                     if complaint_obj.in_progress_at is None:
@@ -206,7 +246,7 @@ def assign_contractor(request, complaint_id):
                 messages.info(request, "Contractor unassigned from complaint.")
             complaint_obj.save()
         else:
-            messages.error(request, "Invalid contractor assignment.")
+            messages.error(request, "Invalid contractor selection. Must be approved and match region/specialty.")
     
     return redirect('officers:complaint_detail', complaint_id)
 

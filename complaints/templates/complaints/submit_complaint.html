@@ -1,175 +1,218 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Submit Complaint{% endblock %}
+{% block title %}Report Issue - UrbanWatch+{% endblock %}
 
 {% block content %}
 
-<div class="max-w-2xl mx-auto py-12 px-4">
-    
-    <div class="bg-white shadow-xl rounded-2xl p-8 border border-gray-200">
+<div class="min-h-screen bg-slate-50 w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] -mt-8 -mb-8">
 
-        <h2 class="text-3xl font-bold text-gray-800 mb-6">
-            Submit a Complaint
-        </h2>
+    <div class="relative bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 pt-10 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+        </div>
 
-        <p class="text-gray-600 mb-6">
-            Please provide detailed information about the issue you're reporting. 
-            The more details you provide, the better we can address your complaint.
-        </p>
-
-        <form method="post" enctype="multipart/form-data" class="space-y-6">
-            {% csrf_token %}
-
-            <!-- Title -->
+        <div class="relative max-w-4xl mx-auto flex justify-between items-end z-10">
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
-                    Title
-                </label>
-                <input 
-                    type="text" 
-                    name="{{ form.title.name }}" 
-                    value="{{ form.title.value|default_if_none:'' }}"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
-                    focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter complaint title"
-                >
-                {% if form.title.errors %}
-                <p class="text-red-600 text-sm mt-1">{{ form.title.errors.0 }}</p>
-                {% endif %}
+                <h1 class="text-3xl font-black text-white tracking-tight">
+                    New Complaint
+                </h1>
+                <p class="text-indigo-200 text-sm mt-1">
+                    Please provide precise details for faster resolution.
+                </p>
             </div>
-
-            <!-- Description -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
-                    Description
-                </label>
-                <textarea 
-                    name="{{ form.description.name }}" 
-                    rows="4"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
-                    focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe your complaint"
-                >{{ form.description.value|default_if_none:'' }}</textarea>
-                {% if form.description.errors %}
-                <p class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</p>
-                {% endif %}
+            <div class="hidden md:block">
+                <span class="bg-white/10 border border-white/10 text-white px-3 py-1 rounded-full text-xs font-mono">
+                    Step 1 of 1
+                </span>
             </div>
+        </div>
+    </div>
 
-            <!-- Category -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
-                    Category
-                </label>
-                <div class="relative">
-                    {{ form.category }}
-
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 pb-20 z-20">
+        
+        <div class="bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden">
+            
+            {% if messages or form.errors %}
+            <div class="px-6 md:px-8 pt-6">
+                
+                {% if messages %}
+                {% for message in messages %}
+                <div class="mb-4 flex items-start gap-3 p-4 rounded-lg border-l-4 border-red-500 bg-red-50 shadow-sm">
+                    <div class="text-red-500 mt-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-red-800">Attention Needed</h3>
+                        <p class="text-sm text-red-600 mt-0.5">{{ message }}</p>
+                    </div>
                 </div>
-                {% if form.category.errors %}
-                <p class="text-red-600 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                {% endfor %}
                 {% endif %}
-            </div>
 
-            <!-- Location -->
-           <!-- <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
-                    Location
-                </label>
-                <input 
-                    type="text"
-                    name="{{ form.location.name }}"
-                    value="{{ form.location.value|default_if_none:'' }}"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
-                    focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter location"
-                >
-                {% if form.location.errors %}
-                <p class="text-red-600 text-sm mt-1">{{ form.location.errors.0 }}</p>
-                {% endif %}
-            </div> -->
-
-            <!--Region-->
-            <!-- <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
-                    Region
-                </label>
-                <div class="relative">
-                    {{ form.region }}
-
+                {% if form.errors %}
+                <div class="flex items-start gap-3 p-4 rounded-lg border-l-4 border-amber-500 bg-amber-50 shadow-sm">
+                    <div class="text-amber-500 mt-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-amber-800">Please correct the following errors:</h3>
+                        <ul class="list-disc list-inside text-sm text-amber-700 mt-1 ml-1">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li><span class="font-bold">{{ field.label }}:</span> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                {% if form.region.errors %}
-                <p class="text-red-600 text-sm mt-1">{{ form.region.errors.0 }}</p>
                 {% endif %}
-            </div> -->
 
-            <!-- Proof Image -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">
-                    Proof Image
-                </label>
-                <input 
-                    type="file"
-                    name="{{ form.proof_image.name }}"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white 
-                    file:bg-gray-100 file:py-2 file:px-4 file:rounded file:border-0 
-                    focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                {% if form.proof_image.errors %}
-                <p class="text-red-600 text-sm mt-1">{{ form.proof_image.errors.0 }}</p>
-                {% endif %}
             </div>
-            
-            <!-- Location -->
-            <div class="mb-6">
-                <label class="block text-gray-700 font-bold mb-2">Pinpoint Location (Drag marker to adjust)</label>
-            
-                <div id="map" class="h-80 w-full rounded-lg border-2 border-gray-300 z-0"></div>
-            
-                <button type="button" onclick="getLocation()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
-                    📍 Use My Current Location
-                </button>
-            
-                <p class="mt-2 text-sm text-gray-600">Selected Address: <span id="address_display" class="font-semibold">Mumbai (Default)</span></p>
-                <p class="mt-1 text-sm text-gray-600">
-                Pincode: <span id="pincode_display" class="font-semibold">—</span>
-</p>
+            {% endif %}
+            <div class="p-6 md:p-8">
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="group">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                Issue Title <span class="text-red-500">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                name="{{ form.title.name }}" 
+                                value="{{ form.title.value|default_if_none:'' }}"
+                                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 text-sm font-semibold focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                                placeholder="e.g. Broken Streetlight"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                Category <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                {{ form.category }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                Description <span class="text-red-500">*</span>
+                            </label>
+                            <textarea 
+                                name="{{ form.description.name }}" 
+                                rows="3"
+                                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all resize-none"
+                                placeholder="Brief details about the problem..."
+                            >{{ form.description.value|default_if_none:'' }}</textarea>
+                        </div>
+
+                        <div class="md:col-span-1">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                Evidence <span class="text-red-500">*</span>
+                            </label>
+                            
+                            <div class="relative h-[86px] border-2 border-dashed border-slate-300 rounded-lg bg-slate-50 hover:bg-purple-50 hover:border-purple-300 transition-colors overflow-hidden group">
+                                
+                                <input 
+                                    type="file"
+                                    name="{{ form.proof_image.name }}"
+                                    id="evidence_input"
+                                    accept="image/*"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                    onchange="previewImage(this)"
+                                >
+        
+                            <div id="upload_placeholder" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 transition-opacity duration-300">
+                                <svg class="w-5 h-5 text-slate-400 group-hover:text-purple-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span class="text-[10px] text-slate-500 font-bold group-hover:text-purple-600">Click to Upload</span>
+                            </div>
+                                <img id="image_preview" src="#" alt="Preview" class="absolute inset-0 w-full h-full object-cover hidden z-0">
+                            </div>
+                            
+                            {% if form.proof_image.errors %}
+                            <p class="text-red-500 text-xs mt-1 font-bold">{{ form.proof_image.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                            Pin Location <span class="text-red-500">*</span>
+                        </label>
+                        
+                        <div class="relative rounded-lg overflow-hidden border border-slate-300 shadow-sm">
+                            <div id="map" class="h-64 w-full z-0"></div>
+                            
+                            <button type="button" onclick="getLocation()" class="absolute bottom-3 right-3 bg-white shadow-md border border-slate-200 text-xs font-bold text-slate-700 hover:text-purple-600 px-3 py-1.5 rounded-md z-[1000] flex items-center gap-1 transition-transform hover:scale-105">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+                                Locate Me
+                            </button>
+                        </div>
+
+                        <div class="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-start gap-3">
+                            <div class="mt-0.5 text-purple-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selected Address</p>
+                                <p id="address_display" class="text-sm font-semibold text-slate-700 break-words leading-snug mt-0.5">
+                                    Mumbai (Default)
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Pincode: <span id="pincode_display" class="font-mono font-bold text-slate-700">—</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="latitude" id="id_latitude">
+                        <input type="hidden" name="longitude" id="id_longitude">
+                        <input type="hidden" name="pincode" id="id_pincode">
+                        <input type="hidden" name="location" id="id_location">
+                        
+                        {% if form.location.errors %}
+                        <p class="text-red-500 text-xs mt-2 font-bold">{{ form.location.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="pt-2">
+                        <button 
+                            type="submit"
+                            class="w-full py-3 bg-slate-900 text-white rounded-lg text-sm font-bold shadow-lg hover:bg-purple-600 transition-all duration-300 flex items-center justify-center gap-2"
+                        >
+                            <span>Submit Complaint</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+
+                </form>
             </div>
-
-            <input type="hidden" name="latitude" id="id_latitude">
-            <input type="hidden" name="longitude" id="id_longitude">
-            <input type="hidden" name="pincode" id="id_pincode">
-            <input type="hidden" name="location" id="id_location">
-
-            <!-- Submit Button -->
-            <button 
-                type="submit"
-                class="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold 
-                hover:bg-blue-700 transition duration-200"
-            >
-                Submit Complaint
-            </button>
-
-        </form>
-
+        </div>
     </div>
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
-
 <script>
     var mumbaiCenter = [19.0760, 72.8777];
-    var map = L.map('map').setView(mumbaiCenter, 12);
-    
+    var map = L.map('map', {zoomControl: false}).setView(mumbaiCenter, 12);
+    L.control.zoom({ position: 'topright' }).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var marker;
 
-    // Function to update hidden inputs and UI
     function updateLocationData(lat, lng) {
         document.getElementById('id_latitude').value = lat;
         document.getElementById('id_longitude').value = lng;
@@ -180,53 +223,40 @@
                 if(data && data.address) {
                     let fullAddress = data.display_name;
                     let pincode = data.address.postcode || "Unknown";
-
-                    document.getElementById('address_display').innerText = fullAddress;
-                    document.getElementById('pincode_display').innerText = pincode;
                     
+                    // Display full address in the box below
+                    document.getElementById('address_display').innerText = fullAddress;
                     document.getElementById('id_location').value = fullAddress;
                     document.getElementById('id_pincode').value = pincode;
+                    document.getElementById('pincode_display').innerText = pincode;
                 }
             });
     }
 
-    // --- FIX 1: Search Bar Integration ---
     var geocoder = L.Control.geocoder({
         defaultMarkGeocode: false,
-        placeholder: "Search area in Mumbai..."
+        placeholder: "Search..."
     })
     .on('markgeocode', function(e) {
         var center = e.geocode.center;
-        map.setView(center, 16); // Zoom in to searched area
-        
-        if (marker) {
-            marker.setLatLng(center);
-        } else {
-            createMarker(center);
-        }
-        // This line ensures the search updates your Django fields!
+        map.setView(center, 16);
+        if (marker) marker.setLatLng(center);
+        else createMarker(center);
         updateLocationData(center.lat, center.lng); 
     })
     .addTo(map);
 
-    // Helper to create the marker and add the drag event
     function createMarker(latlng) {
         marker = L.marker(latlng, {draggable: true}).addTo(map);
-        
-        // --- FIX 2: Drag End Event ---
         marker.on('dragend', function(event) {
             var pos = marker.getLatLng();
             updateLocationData(pos.lat, pos.lng);
         });
     }
 
-    // --- FIX 3: Click Event ---
     map.on('click', function(e) {
-        if (marker) {
-            marker.setLatLng(e.latlng);
-        } else {
-            createMarker(e.latlng);
-        }
+        if (marker) marker.setLatLng(e.latlng);
+        else createMarker(e.latlng);
         updateLocationData(e.latlng.lat, e.latlng.lng);
     });
 
@@ -242,6 +272,138 @@
             });
         }
     }
+
+       // --- 1. ROBUST IMAGE PREVIEW ---
+    function previewImage(input) {
+        const preview = document.getElementById('image_preview');
+        const placeholder = document.getElementById('upload_placeholder');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                // Force the image to show and hide the placeholder
+                preview.classList.remove('hidden'); 
+                placeholder.style.display = 'none'; // Completely remove placeholder
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // --- 2. MAP LOGIC ---
+    var mumbaiCenter = [19.0760, 72.8777];
+    var map = L.map('map', {zoomControl: false}).setView(mumbaiCenter, 12);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var marker;
+
+    function updateLocationData(lat, lng) {
+        // Update hidden inputs immediately
+        document.getElementById('id_latitude').value = lat;
+        document.getElementById('id_longitude').value = lng;
+
+        // UI FEEDBACK: Show a loading spinner
+        const addressEl = document.getElementById('address_display');
+        addressEl.innerHTML = `
+            <span class="flex items-center gap-2 text-slate-400">
+                <svg class="animate-spin h-4 w-4 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Fetching address...
+            </span>
+        `;
+        document.getElementById('pincode_display').innerText = "...";
+
+        // Fetch Address
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(response => response.json())
+            .then(data => {
+                if(data && data.address) {
+                    let fullAddress = data.display_name;
+                    let pincode = data.address.postcode || "Unknown";
+                    
+                    // Update UI with actual data
+                    addressEl.innerText = fullAddress;
+                    addressEl.classList.remove("text-slate-400");
+                    
+                    document.getElementById('id_location').value = fullAddress;
+                    document.getElementById('id_pincode').value = pincode;
+                    document.getElementById('pincode_display').innerText = pincode;
+                }
+            })
+            .catch(error => {
+                addressEl.innerText = "Address not found (Coordinates saved)";
+            });
+    }
+
+    // --- 3. SEARCH & MARKER LOGIC ---
+    var geocoder = L.Control.geocoder({
+        defaultMarkGeocode: false,
+        placeholder: "Search area..."
+    })
+    .on('markgeocode', function(e) {
+        var center = e.geocode.center;
+        map.setView(center, 16);
+        if (marker) marker.setLatLng(center);
+        else createMarker(center);
+        updateLocationData(center.lat, center.lng); 
+    })
+    .addTo(map);
+
+    function createMarker(latlng) {
+        marker = L.marker(latlng, {draggable: true}).addTo(map);
+        marker.on('dragend', function(event) {
+            var pos = marker.getLatLng();
+            updateLocationData(pos.lat, pos.lng);
+        });
+    }
+
+    map.on('click', function(e) {
+        if (marker) marker.setLatLng(e.latlng);
+        else createMarker(e.latlng);
+        updateLocationData(e.latlng.lat, e.latlng.lng);
+    });
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            // Show loading state for button click
+            document.getElementById('address_display').innerText = "Locating you...";
+            
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                map.setView([lat, lng], 16);
+                if (marker) marker.setLatLng([lat, lng]);
+                else createMarker([lat, lng]);
+                updateLocationData(lat, lng);
+            });
+        }
+    }
+
 </script>
 
+
+ 
+
+<style>
+    .leaflet-control-geocoder {
+        border-radius: 0.5rem !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        margin-top: 10px !important;
+        margin-left: 10px !important;
+    }
+    .leaflet-control-geocoder-form input {
+        padding: 4px 8px !important;
+        font-size: 12px !important;
+    }
+    .leaflet-control-geocoder-icon {
+        width: 26px !important;
+        height: 26px !important;
+    }
+</style>
 {% endblock %}
