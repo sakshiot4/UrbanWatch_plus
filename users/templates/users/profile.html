@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - UrbanWatch+{% endblock %}
+
+{% block content %}
+<div class="relative min-h-[80vh] w-full">
+    
+    <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 -z-10 rounded-b-[3rem] shadow-2xl -mt-8"></div>
+    <div class="absolute top-20 right-10 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute top-20 left-10 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -z-10"></div>
+
+    <div class="max-w-6xl mx-auto py-12 px-4 sm:px-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            
+            <div class="md:col-span-1 space-y-6">
+                <div class="card bg-white/90 backdrop-blur-xl shadow-2xl border border-white/50 text-center p-6 relative overflow-hidden">
+                    
+                    <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-slate-800 to-slate-900 opacity-10"></div>
+
+                    <div class="avatar placeholder mx-auto mb-4 relative z-10 flex justify-center">
+                        <div class="w-28 rounded-full h-28 ring-4 ring-offset-4 ring-offset-white ring-purple-600 shadow-xl overflow-hidden ">
+                            {% if role == 'Officer' and user.officer_profile.profile_pic %}
+                                <img src="{{ user.officer_profile.profile_pic.url }}" class="object-cover" />
+                            {% elif role == 'Contractor' and user.contractor_profile.profile_pic %}
+                                <img src="{{ user.contractor_profile.profile_pic.url }}" class="object-cover" />
+                            {% elif role == 'Citizen' and user.citizen_profile.profile_pic %}
+                                <img src="{{ user.citizen_profile.profile_pic.url }}" class="object-cover" />
+                            {% else %}
+                                <div class="bg-slate-800 text-white w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-900">
+                                    <span class="text-4xl font-black">{{ user.username|first|upper }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">{{ user.get_full_name|default:user.username }}</h2>
+                        
+                        <div class="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+                            <span class="w-2 h-2 rounded-full 
+                                {% if role == 'Officer' %}bg-purple-500{% elif role == 'Contractor' %}bg-teal-500{% else %}bg-blue-500{% endif %}">
+                            </span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-slate-600">{{ role }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats stats-vertical shadow-lg w-full bg-white border border-slate-100 rounded-2xl overflow-hidden divide-y divide-slate-100">
+                    <div class="stat px-6 py-4 hover:bg-slate-50 transition-colors">
+                        <div class="stat-title text-xs font-bold uppercase tracking-widest text-slate-400">{{ stat_label_1 }}</div>
+                        <div class="stat-value text-3xl font-black text-slate-800">{{ total_count }}</div>
+                    </div>
+                    <div class="stat px-6 py-4 hover:bg-slate-50 transition-colors">
+                        <div class="stat-title text-xs font-bold uppercase tracking-widest text-slate-400">{{ stat_label_2 }}</div>
+                        <div class="stat-value text-3xl font-black text-emerald-500">{{ success_count }}</div>
+                        <div class="stat-desc font-medium text-slate-400 mt-1">
+                            <span class="text-emerald-500 font-bold">↗ {{ success_rate }}%</span> Success Rate
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post" action="{% url 'account_logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn bg-white border-2 border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 font-bold gap-2 shadow-sm rounded-xl h-12 w-1/2">
+                        <div class="flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        <p>Sign Out<p>
+                        </div>
+                    </button>
+                </form>
+            </div>
+
+            <div class="md:col-span-2">
+                <div class="card bg-white shadow-xl border border-slate-100 rounded-2xl h-full">
+                    <div class="card-body p-8">
+                        
+                        <div id="profile-view" class="h-full flex flex-col">
+                            <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                                <div>
+                                    <h2 class="card-title text-2xl font-black text-slate-800">Personal Details</h2>
+                                    <p class="text-sm text-slate-400 mt-1">Manage your account information</p>
+                                </div>
+                                <button onclick="toggleEdit()" class="btn btn-sm bg-slate-900 text-white hover:bg-slate-700 border-none rounded-lg gap-2 shadow-lg shadow-slate-900/20 p-4 w-1/4">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                                        <p class="text-sm text-center">Edit Profile</p>
+                                    
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Username</label><p class="text-lg font-bold text-slate-700">{{ user.username }}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Email</label><p class="text-lg font-bold text-slate-700">{{ user.email }}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">First Name</label><p class="text-lg font-bold text-slate-700">{{ user.first_name }}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Last Name</label><p class="text-lg font-bold text-slate-700">{{ user.last_name }}</p></div>
+                                
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Mobile No.</label>
+                                    <p class="text-lg font-bold text-slate-700">{{ current_phone|default:"-" }}</p>
+                                </div>
+
+                                {% if role == 'Citizen' %}
+                                <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Address</label>
+                                    <p class="text-lg font-bold text-slate-700">{{ current_address|default:"-" }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if role == 'Officer' %}
+                                <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                    <label class="text-[10px] font-bold text-purple-400 uppercase tracking-widest block mb-1">Jurisdiction Region</label>
+                                    <p class="text-lg font-bold text-purple-900">{{ user.officer_profile.get_region_display }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if role == 'Contractor' %}
+                                <div class="bg-teal-50 p-4 rounded-xl border border-teal-100">
+                                    <label class="text-[10px] font-bold text-teal-600 uppercase tracking-widest block mb-1">Company Name</label>
+                                    <p class="text-lg font-bold text-teal-900">{{ user.contractor_profile.company_name }}</p>
+                                </div>
+                                <div class="bg-teal-50 p-4 rounded-xl border border-teal-100">
+                                    <label class="text-[10px] font-bold text-teal-600 uppercase tracking-widest block mb-1">Region</label>
+                                    <p class="text-lg font-bold text-teal-900">{{ user.contractor_profile.get_region_display }}</p>
+                                </div>
+                                <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Specialization</label>
+                                    <span class="inline-block px-3 py-1 bg-white border border-slate-200 rounded text-sm font-bold text-slate-600 shadow-sm">{{ user.contractor_profile.specialization }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div id="profile-edit" class="hidden">
+                            <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                                <h2 class="card-title text-2xl font-black text-slate-800">Edit Profile</h2>
+                                {% comment %} <button onclick="toggleEdit()" class="btn btn-ghost btn-sm hover:bg-slate-100 text-slate-500">Cancel</button> {% endcomment %}
+                            </div>
+                            
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% if u_form.errors or p_form.errors %}
+                                    <div class="alert alert-error shadow-lg mb-6 rounded-xl">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span class="font-bold">Please fix the errors below.</span>
+                                    </div>
+                                    <script>document.getElementById('profile-view').classList.add('hidden');document.getElementById('profile-edit').classList.remove('hidden');</script>
+                                {% endif %}
+
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100 opacity-70">
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text text-xs font-bold text-slate-400 uppercase">Username</span></label>
+                                            <input type="text" value="{{ user.username }}" class="input input-bordered bg-white text-slate-500 cursor-not-allowed text-sm font-bold" disabled />
+                                        </div>
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text text-xs font-bold text-slate-400 uppercase">Role</span></label>
+                                            <input type="text" value="{{ role }}" class="input input-bordered bg-white text-slate-500 cursor-not-allowed text-sm font-bold" disabled />
+                                        </div>
+
+                                        {% if role == 'Officer' %}
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text text-xs font-bold text-slate-400 uppercase">Region (Fixed)</span></label>
+                                            <input type="text" value="{{ user.officer_profile.get_region_display }}" class="input input-bordered bg-white text-slate-500 cursor-not-allowed text-sm font-bold" disabled />
+                                        </div>
+                                        {% endif %}
+
+                                        {% if role == 'Contractor' %}
+                                            <div class="form-control">
+                                                <label class="label"><span class="label-text text-xs font-bold text-slate-400 uppercase">Company Name</span></label>
+                                                <input type="text" value="{{ user.contractor_profile.company_name }}" class="input input-bordered bg-white text-slate-500 cursor-not-allowed text-sm font-bold" disabled />
+                                            </div>
+                                            <div class="form-control">
+                                                <label class="label"><span class="label-text text-xs font-bold text-slate-400 uppercase">Region</span></label>
+                                                <input type="text" value="{{ user.contractor_profile.get_region_display }}" class="input input-bordered bg-white text-slate-500 cursor-not-allowed text-sm font-bold" disabled />
+                                            </div>
+                                            <div class="form-control">
+                                                <label class="label"><span class="label-text text-xs font-bold text-slate-400 uppercase">Specialization</span></label>
+                                                <input type="text" value="{{ user.contractor_profile.specialization }}" class="input input-bordered bg-white text-slate-500 cursor-not-allowed text-sm font-bold" disabled />
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="divider text-slate-300 text-xs font-bold uppercase tracking-widest">Update Information</div>
+
+                                    <div class="form-control">
+                                        <label class="label"><span class="label-text font-bold text-slate-700">Profile Picture</span></label>
+                                        <div class="file-input-wrapper">
+                                            {{ p_form.profile_pic }} 
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-1 ml-1">Recommended: Square JPG/PNG</p>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text font-bold text-slate-700">First Name</span></label>
+                                            <div class="[&>input]:input [&>input]:input-bordered [&>input]:w-full [&>input]:bg-white [&>input]:focus:border-purple-500 [&>input]:focus:ring-1 [&>input]:focus:ring-purple-500">
+                                                {{ u_form.first_name }}
+                                            </div>
+                                        </div>
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text font-bold text-slate-700">Last Name</span></label>
+                                            <div class="[&>input]:input [&>input]:input-bordered [&>input]:w-full [&>input]:bg-white [&>input]:focus:border-purple-500 [&>input]:focus:ring-1 [&>input]:focus:ring-purple-500">
+                                                {{ u_form.last_name }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text font-bold text-slate-700">Email</span></label>
+                                            <div class="[&>input]:input [&>input]:input-bordered [&>input]:w-full [&>input]:bg-white [&>input]:focus:border-purple-500 [&>input]:focus:ring-1 [&>input]:focus:ring-purple-500">
+                                                {{ u_form.email }}
+                                            </div>
+                                        </div>
+                                        <div class="form-control">
+                                            <label class="label"><span class="label-text font-bold text-slate-700">Mobile No.</span></label>
+                                            <div class="[&>input]:input [&>input]:input-bordered [&>input]:w-full [&>input]:bg-white [&>input]:focus:border-purple-500 [&>input]:focus:ring-1 [&>input]:focus:ring-purple-500">
+                                                {{ p_form.phone }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {% if role == 'Citizen' and p_form.address %}
+                                    <div class="form-control">
+                                        <label class="label"><span class="label-text font-bold text-slate-700">Address</span></label>
+                                        <div class="[&>input]:input [&>input]:input-bordered [&>input]:w-full [&>input]:bg-white [&>input]:focus:border-purple-500 [&>input]:focus:ring-1 [&>input]:focus:ring-purple-500">
+                                            {{ p_form.address }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+                                        <button type="button" onclick="toggleEdit()" class="btn btn-ghost  w-full sm:w-auto rounded-xl">Cancel</button>
+                                        <button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white border-none rounded-xl shadow-lg shadow-purple-200 w-full sm:w-auto px-8 h-12 text-sm font-bold uppercase tracking-wider">
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleEdit() {
+        document.getElementById('profile-view').classList.toggle('hidden');
+        document.getElementById('profile-edit').classList.toggle('hidden');
+    }
+</script>
+
+<style>
+    /* Helper to style Django Form Widgets automatically */
+    input[type="text"], input[type="email"], input[type="number"] {
+        @apply input input-bordered w-full bg-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500;
+    }
+    input[type="file"] {
+        @apply file-input file-input-bordered file-input-primary w-full max-w-xs;
+    }
+</style>
+{% endblock %}

@@ -25,6 +25,7 @@ class Citizen(models.Model):
     address = models.CharField(max_length=255, help_text="Residential address (required)")
     region = models.CharField(max_length=100, choices=REGION_CHOICES, help_text="Region (required)")
     is_registered = models.BooleanField(default=True , help_text="Account registration status")
+    profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

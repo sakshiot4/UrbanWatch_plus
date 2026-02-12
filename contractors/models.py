@@ -34,6 +34,8 @@ class Contractor(models.Model):
     email = models.EmailField(max_length=255, 
                     validators=[EmailValidator()], help_text="Valid email address (required)")
     
+    profile_pic = models.ImageField(upload_to='contractor_logos/', blank=True, null=True)
+    
     phone = models.CharField(max_length=20,
                 validators=[RegexValidator(regex = r'^[0-9]{10}$',
                 message="Phone number must be 10 digits",code='invalid_phone',)]

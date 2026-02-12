@@ -1,125 +1,193 @@
 {% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}UrbanWatch+{% endblock %}</title>
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        UrbanWatch+
+      {% endblock %}
+    </title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <style>
-        /* Essential custom classes */
-        .clip-path-slant {
-            clip-path: polygon(0 40%, 100% 0%, 100% 100%, 0% 100%);
-        }
-        .glass-sidebar {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
+      /* Essential custom classes */
+      .clip-path-slant {
+        clip-path: polygon(0 40%, 100% 0%, 100% 100%, 0% 100%);
+      }
+      .glass-sidebar {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
     </style>
-</head>
+  </head>
 
-<body class="overflow-x-hidden font-sans text-slate-600 bg-gray-50 min-h-screen flex flex-col">
+  <body class="overflow-x-hidden font-sans text-slate-600 bg-gray-50 min-h-screen flex flex-col">
 
-  <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity opacity-0"></div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity opacity-0"></div>
 
-  <aside id="sidebar" class="fixed top-0 right-0 h-full w-80 glass-sidebar shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-l border-white/20">
-    <div class="p-6 flex justify-between items-center border-b border-gray-200">
-      <span class="text-xl font-bold text-teal-800">Menu</span>
-      <button onclick="toggleSidebar()" class="text-gray-500 hover:text-red-500 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-
-    <div class="p-6 overflow-y-auto grow space-y-8">
-      <div>
-        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Citizen Access</h4>
-        <ul class="space-y-4">
-          <li><a href="/" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Home</a></li>
-          <li><a href="#about" onclick="toggleSidebar()" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">About</a></li>
-          {% if user.is_authenticated %}
-          <li><a href="{% url 'account_logout' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Logout</a></li>
-          {% else %}
-          <li><a href="{% url 'account_login' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Login</a></li>
-          <li><a href="{% url 'account_signup' %}" class="text-lg font-bold text-purple-600 block">Register Account</a></li>
-        {% endif %}
-        </ul>
-      </div>
-    </div>
-  </aside>
-
-  <div class="bg-gradient-to-br from-purple-100 to-purple-300 relative min-h-screen flex flex-col">
-
-    <div class="absolute top-0 left-0 transform translate-x-6 translate-y-4 pointer-events-none fixed">
-      <div class="absolute w-64 h-64 rounded-full opacity-50 bg-gradient-to-br from-teal-100 to-teal-200"></div>
-      <div class="absolute w-64 h-64 mt-10 ml-10 rounded-full opacity-50 bg-gradient-to-br from-purple-100 to-purple-200"></div>
-    </div>
-    <div class="absolute top-0 right-0 hidden mr-48 transform -translate-x-64 translate-y-64 lg:block pointer-events-none fixed">
-      <div class="absolute w-64 h-64 rounded-full bg-gradient-to-br from-teal-100 to-teal-200"></div>
-    </div>
-
-    <nav class="sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-white/40 shadow-sm flex-none">
-      <div class="container flex justify-between items-center px-6 py-4 mx-auto">
-        <a href="/" class="text-3xl font-bold text-teal-700 tracking-tight">
-          UrbanWatch<span class="text-purple-600">+</span>
-        </a>
-
-        <div class="hidden md:flex items-center gap-8">
-          {% if user.is_authenticated %}
-            <li><a href="{% url 'account_logout' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Logout</a></li>
-            <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
+    <aside id="sidebar" class="fixed top-0 right-0 h-full w-80 glass-sidebar shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-l border-white/20">
+      <div class="p-6 flex justify-between items-center border-b border-gray-200">
+        
+    <div class="ml-4">
+    <a href="{% url 'users:profile' %}" class="group relative flex items-center transition-all hover:opacity-90">
+        <div class="w-12 h-12 rounded-full border-2 border-purple-500 ring-2 ring-purple-100 overflow-hidden bg-white flex items-center justify-center shadow-sm">
+            
+            {% if user.officer_profile.profile_pic %}
+                <img src="{{ user.officer_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+            
+            {% elif user.contractor_profile.profile_pic %}
+                <img src="{{ user.contractor_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+            
+            {% elif user.citizen_profile.profile_pic %}
+                <img src="{{ user.citizen_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+            
             {% else %}
-          <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
-          <a href="{% url 'account_login' %}" class="text-gray-700 font-bold hover:text-purple-700 transition">Login</a>
-          <a href="{% url 'account_signup' %}" class="px-6 py-2 bg-purple-700 text-white font-bold rounded-full shadow-lg hover:bg-purple-800 transition transform hover:-translate-y-0.5">
-            Register
-          </a>
-          {% endif %}
-        </div>
+                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-purple-900">
+                    <span class="text-sm font-black text-white uppercase">{{ user.username|first }}</span>
+                </div>
+            {% endif %}
 
-        <button onclick="toggleSidebar()" class="md:hidden p-2 text-teal-900">
+        </div>
+    </a>
+</div>
+        <button onclick="toggleSidebar()" class="text-gray-500 hover:text-red-500 transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-    </nav>
-
-    <main class="container mx-auto px-4 py-8 relative z-10 flex-grow">
-        {% comment %} {% if messages %}
-        <div class="max-w-4xl mx-auto mb-6">
-            {% for message in messages %}
-            <div class="p-4 mb-2 rounded-lg shadow-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
+      
+      <div class="p-6 overflow-y-auto grow space-y-8 -mt-6">
+        <div>
+          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Citizen Access</h4>
+          <ul class="space-y-4">
+            <li>
+              <a href="/" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Home</a>
+            </li>
+            <li>
+              <a href="#about" onclick="toggleSidebar()" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">About</a>
+            </li>
+            {% if user.is_authenticated %}
+              <li>
+                <a href="{% url 'account_logout' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Logout</a>
+              </li>
+              <li>
+                <a href="{% url 'users:profile' %}" class="justify-between">
+                  My Profile
+                  <span class="badge badge-primary badge-sm">New</span>
+                </a>
+              </li>
+            {% else %}
+              <li>
+                <a href="{% url 'account_login' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Login</a>
+              </li>
+              <li>
+                <a href="{% url 'account_signup' %}" class="text-lg font-bold text-purple-600 block">Register Account</a>
+              </li>
+            {% endif %}
+          </ul>
         </div>
+      </div>
+    </aside>
+
+    <div class="bg-gradient-to-br from-purple-100 to-purple-300 relative min-h-screen flex flex-col">
+      <div class="absolute top-0 left-0 transform translate-x-6 translate-y-4 pointer-events-none fixed">
+        <div class="absolute w-64 h-64 rounded-full opacity-50 bg-gradient-to-br from-teal-100 to-teal-200"></div>
+        <div class="absolute w-64 h-64 mt-10 ml-10 rounded-full opacity-50 bg-gradient-to-br from-purple-100 to-purple-200"></div>
+      </div>
+      <div class="absolute top-0 right-0 hidden mr-48 transform -translate-x-64 translate-y-64 lg:block pointer-events-none fixed">
+        <div class="absolute w-64 h-64 rounded-full bg-gradient-to-br from-teal-100 to-teal-200"></div>
+      </div>
+
+      <nav class="sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-white/40 shadow-sm flex-none">
+        <div class="container flex justify-between items-center px-6 py-4 mx-auto">
+          <a href="/" class="text-3xl font-bold text-teal-700 tracking-tight">UrbanWatch<span class="text-purple-600">+</span></a>
+
+          <div class="hidden md:flex items-center gap-8">
+            {% if user.is_authenticated %}
+              <li>
+                <a href="{% url 'account_logout' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Logout</a>
+              </li>
+              <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
+              <div class="flex items-center ml-4">
+                    <a href="{% url 'users:profile' %}" class="group relative flex items-center transition-all hover:opacity-90">
+                        <div class="w-10 h-10 rounded-full border-2 border-purple-500 ring-2 ring-purple-100 overflow-hidden bg-white flex items-center justify-center shadow-sm">
+                            
+                            {% if user.officer_profile.profile_pic %}
+                                <img src="{{ user.officer_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+                            
+                            {% elif user.contractor_profile.profile_pic %}
+                                <img src="{{ user.contractor_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+                            
+                            {% elif user.citizen_profile.profile_pic %}
+                                <img src="{{ user.citizen_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+                            
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-purple-900">
+                                    <span class="text-sm font-black text-white uppercase">{{ user.username|first }}</span>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </a>
+                </div>
+            {% else %}
+              <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
+              <a href="{% url 'account_login' %}" class="text-gray-700 font-bold hover:text-purple-700 transition">Login</a>
+              <a href="{% url 'account_signup' %}" class="px-6 py-2 bg-purple-700 text-white font-bold rounded-full shadow-lg hover:bg-purple-800 transition transform hover:-translate-y-0.5">Register</a>
+            {% endif %}
+          </div>
+
+          <button onclick="toggleSidebar()" class="md:hidden p-2 text-teal-900">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      <main class="container mx-auto px-4 py-8 relative z-10 flex-grow">
+        {% comment %} {% if messages %}
+          <div class="max-w-4xl mx-auto mb-6">
+            {% for message in messages %}
+              <div class="p-4 mb-2 rounded-lg shadow-md {% if message.tags == 'error' %}
+                  
+                  bg-red-100 text-red-700
+
+                {% else %}
+                  
+                  bg-green-100 text-green-700
+
+                {% endif %}">{{ message }}</div>
+            {% endfor %}
+          </div>
         {% endif %} {% endcomment %}
 
-        {% block content %}{% endblock %}
-    </main>
-    {% include 'footer.html' %}
+        {% block content %}
 
-  </div> <script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      const isHidden = sidebar.classList.contains('translate-x-full');
-
-      if (isHidden) {
-        sidebar.classList.remove('translate-x-full');
-        overlay.classList.remove('hidden');
-        setTimeout(() => overlay.classList.add('opacity-100'), 10);
-      } else {
-        sidebar.classList.add('translate-x-full');
-        overlay.classList.remove('opacity-100');
-        setTimeout(() => overlay.classList.add('hidden'), 300);
-      }
-    }
-  </script>
-</body>
+        {% endblock %}
+      </main>
+      {% include 'footer.html' %}
+    </div> <script>
+             function toggleSidebar() {
+               const sidebar = document.getElementById('sidebar')
+               const overlay = document.getElementById('sidebar-overlay')
+               const isHidden = sidebar.classList.contains('translate-x-full')
+             
+               if (isHidden) {
+                 sidebar.classList.remove('translate-x-full')
+                 overlay.classList.remove('hidden')
+                 setTimeout(() => overlay.classList.add('opacity-100'), 10)
+               } else {
+                 sidebar.classList.add('translate-x-full')
+                 overlay.classList.remove('opacity-100')
+                 setTimeout(() => overlay.classList.add('hidden'), 300)
+               }
+             }
+           </script>
+  </body>
 </html>

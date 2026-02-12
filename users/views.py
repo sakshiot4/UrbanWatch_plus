@@ -6,6 +6,7 @@ from django.db.models import Count  # NEEDED FOR BADGE COUNTS
 
 from complaints.models import Complaint
 from .models import Citizen
+from .forms import UserUpdateForm, CitizenProfileForm, OfficerProfileForm, ContractorProfileForm
 
 
 
@@ -98,6 +99,7 @@ def citizen_dashboard(request):
 
 @login_required
 def complaint_status_detail(request, complaint_id):
+
     """Citizen view their complaint status with the timeline"""
     try:
         citizen = Citizen.objects.get(user = request.user)
@@ -172,3 +174,97 @@ def complaint_status_detail(request, complaint_id):
     }
 
     return render(request, 'users/complaint_status_detail.html', context)
+
+from .forms import UserUpdateForm, CitizenProfileForm, OfficerProfileForm, ContractorProfileForm
+
+@login_required
+def profile(request):
+    user = request.user
+    
+    # --- 1. DETERMINE ROLE & SELECT FORM CLASS ---
+    role = "Citizen"
+    profile_data = None
+    ProfileForm = CitizenProfileForm  # Default class
+
+    if hasattr(user, 'officer_profile'):
+        role = "Officer"
+        profile_data = user.officer_profile
+        ProfileForm = OfficerProfileForm
+        
+    elif hasattr(user, 'contractor_profile'):
+        role = "Contractor"
+        profile_data = user.contractor_profile
+        ProfileForm = ContractorProfileForm
+        
+    elif hasattr(user, 'citizen_profile'):
+        role = "Citizen"
+        profile_data = user.citizen_profile
+        ProfileForm = CitizenProfileForm
+
+    # --- 2. HANDLE FORM SUBMISSION ---
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=user)
+        # Initialize the selected form with data and files
+        p_form = ProfileForm(request.POST, request.FILES, instance=profile_data)
+
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, f'Your profile has been updated!')
+            return redirect('users:profile')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        u_form = UserUpdateForm(instance=user)
+        p_form = ProfileForm(instance=profile_data)
+
+    # --- 3. DISPLAY INFO (For "View Mode") ---
+    # We pass these to the template so we don't have to query logic there
+    current_phone = getattr(profile_data, 'phone', '-')
+    current_address = "-"
+    
+    if role == 'Citizen':
+        current_address = getattr(profile_data, 'address', '-')
+    elif role == 'Officer':
+        current_address = f"{profile_data.get_region_display()} Region"
+    elif role == 'Contractor':
+        current_address = f"{profile_data.company_name} ({profile_data.get_region_display()})"
+
+    # --- 4. STATS LOGIC (Keep your existing stats code exactly as is) ---
+    stat_label_1 = "Reports Submitted"
+    stat_label_2 = "Resolved Issues"
+    total_count = 0
+    success_count = 0
+
+    if role == "Officer":
+        stat_label_1 = "Cases Managed"
+        stat_label_2 = "Cases Closed"
+        total_count = Complaint.objects.filter(officer=user.officer_profile).count()
+        success_count = Complaint.objects.filter(officer=user.officer_profile, status='closed').count()
+    elif role == "Contractor":
+        stat_label_1 = "Jobs Assigned"
+        stat_label_2 = "Jobs Completed"
+        total_count = Complaint.objects.filter(contractor=user.contractor_profile).count()
+        success_count = Complaint.objects.filter(contractor=user.contractor_profile, status='completed').count()
+    else: 
+        total_count = Complaint.objects.filter(citizen__user=user).count()
+        success_count = Complaint.objects.filter(citizen__user=user, status='closed').count()
+
+    success_rate = 0
+    if total_count > 0:
+        success_rate = int((success_count / total_count) * 100)
+
+    context = {
+        'u_form': u_form,
+        'p_form': p_form,
+        'role': role,
+        'current_phone': current_phone,
+        'current_address': current_address,
+        'stat_label_1': stat_label_1,
+        'stat_label_2': stat_label_2,
+        'total_count': total_count,
+        'success_count': success_count,
+        'success_rate': success_rate
+    }
+
+    return render(request, 'users/profile.html', context)
