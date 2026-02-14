@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q!m+_x5(qo$v+8#pz_10)y^u+nett^fqivy&+i-8zr)dq227g_'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] #allow all hosts during development, change this in production.
 
 
 # Application definition
@@ -193,8 +194,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 # REPLACE THIS with your actual Gmail address
-EMAIL_HOST_USER = 'urbanwatchplus@gmail.com' 
+EMAIL_HOST_USER = config('EMAIL_HOST_USER') 
 
-EMAIL_HOST_PASSWORD = 'irym cspe psmv kpxw'
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 DEFAULT_FROM_EMAIL = 'UrbanWatch+ Team <urbanwatchplus@gmail.com>'
