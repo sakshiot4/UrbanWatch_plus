@@ -183,3 +183,18 @@ ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_FORMS = {
     'signup': 'accounts.forms.CitizenSignupForm',
 }
+
+# ==========================================
+# EMAIL SETTINGS (Gmail SMTP)
+# ==========================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# REPLACE THIS with your actual Gmail address
+EMAIL_HOST_USER = 'urbanwatchplus@gmail.com' 
+
+EMAIL_HOST_PASSWORD = 'irym cspe psmv kpxw'
+
+DEFAULT_FROM_EMAIL = 'UrbanWatch+ Team <urbanwatchplus@gmail.com>'

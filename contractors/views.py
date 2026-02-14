@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 
+from complaints.emails import send_alert
 from officers.models import Officer
 from officers.forms import StatusUpdateForm #
 
@@ -191,6 +192,41 @@ def contractor_update_status(request, complaint_id):
                 complaint.officer_feedback = None 
                 
                 complaint.save()
+                # --- 📧 EMAIL 1: TO CONTRACTOR (Confirmation) ---
+                if contractor.user.email:
+                    subject = f"Work Submitted: {complaint.title}"
+                    msg = f"""
+                    Hello {contractor.company_name},
+                    
+                    You have successfully marked the job "{complaint.title}" as COMPLETED.
+                    Proof of work has been uploaded.
+                    
+                    Current Status: PENDING VERIFICATION
+                    
+                    Please wait while Officer {complaint.officer.name if complaint.officer else 'assigned'} verifies the work.
+                    """
+                    send_alert(subject, msg, [contractor.user.email])
+
+                # --- 📧 EMAIL 2: TO OFFICER (Verification Needed) ---
+                # Check if an officer is assigned, otherwise notify all officers in region (fallback)
+                officer_email = None
+                if complaint.officer and complaint.officer.user.email:
+                    officer_email = complaint.officer.user.email
+                    
+                if officer_email:
+                    subject = f"Verification Required: {complaint.title}"
+                    msg = f"""
+                    Contractor {contractor.company_name} has completed the job.
+                    
+                    Complaint: "{complaint.title}"
+                    Status: COMPLETED (Pending Verification)
+                    
+                    Action Required:
+                    1. Login to UrbanWatch+
+                    2. View the 'After' photo (Proof of Work)
+                    3. Verify and Close the ticket
+                    """
+                    send_alert(subject, msg, [officer_email])
                 messages.success(request, "Proof uploaded! Work marked as completed and sent for review.")
 
             # --- CASE 3: INVALID TRANSITION ---

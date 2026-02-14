@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required # To restrict access t
 from django.contrib import messages # For user feedback messages.
 from django.core.paginator import Paginator # For paginating long lists.
 
+from complaints.emails import send_alert
 from complaints.models import Complaint 
 
 from contractors.models import Contractor
@@ -109,6 +110,31 @@ def assign_to_me(request, complaint_id):
 
     complaint.save()
 
+    # --- 📧 EMAIL TO CITIZEN (Officer Assigned) ---
+    if complaint.citizen.user.email:
+        subject = f"Update: Officer Assigned"
+        msg = f"""
+        Hello {complaint.citizen.name},
+        
+        Officer {complaint.officer.name} has been assigned to your complaint:
+        "{complaint.title}"
+        
+        They will review the issue and assign a contractor shortly.
+        """
+        send_alert(subject, msg, [complaint.citizen.user.email])
+
+    # --- 📧 EMAIL TO OFFICER (Confirmation) ---
+    if request.user.email:
+        subject = f"Complaint Accepted: #{complaint.id}"
+        msg = f"""
+        You have successfully accepted the complaint:
+        "{complaint.title}"
+        
+        Current Status: ASSIGNED
+        Next Step: Please assign a contractor.
+        """
+        send_alert(subject, msg, [request.user.email])
+
     messages.success(request, f"Complaint '{complaint.title}' assigned to you.")
     return redirect('officers:dashboard')
 
@@ -201,7 +227,6 @@ def update_status(request, complaint_id):
     return redirect('officers:complaint_detail', complaint_id)
 
 @login_required
-@login_required
 def assign_contractor(request, complaint_id):
     """Assign a contractor to the complaint."""
     try:
@@ -245,6 +270,27 @@ def assign_contractor(request, complaint_id):
             else:
                 messages.info(request, "Contractor unassigned from complaint.")
             complaint_obj.save()
+
+            # --- 📧 EMAIL TO CONTRACTOR (New Job) ---
+            contractor = complaint_obj.contractor
+            if contractor.user.email:
+                subject = f"New Work Order: {complaint.title}"
+                msg = f"""
+                Hello {contractor.company_name},
+                
+                You have been assigned a new job by Officer {complaint.officer.name}.
+                
+                Details:
+                Title: {complaint.title}
+                Location: {complaint.location}
+                
+                Status: IN PROGRESS
+                Action: Please start work immediately and upload proof when done.
+                """
+                send_alert(subject, msg, [contractor.user.email])
+
+            messages.success(request, f'Job assigned to {contractor.company_name}. Status: In Progress.')
+            return redirect('officers:dashboard')
         else:
             messages.error(request, "Invalid contractor selection. Must be approved and match region/specialty.")
     
@@ -280,6 +326,42 @@ def close_complaint(request, complaint_id):
         complaint.closed_at = timezone.now()
     
     complaint.save()
+
+    # --- 📧 EMAIL 1: TO CITIZEN (Resolved) ---
+    if complaint.citizen.user.email:
+        subject = f"Resolved: {complaint.title}"
+        msg = f"""
+        Great News!
+        
+        Your complaint "{complaint.title}" has been successfully Verified & Closed by Officer {officer.name}.
+        
+        You can view the 'After' photo in the app.
+        Thank you for helping us keep the city clean!
+        """
+        send_alert(subject, msg, [complaint.citizen.user.email])
+
+    # --- 📧 EMAIL 2: TO CONTRACTOR (Approved) ---
+    if complaint.contractor and complaint.contractor.user.email:
+        subject = f"Work Approved: {complaint.title}"
+        msg = f"""
+        Job Well Done!
+        
+        The complaint "{complaint.title}" has been verified and closed by the Officer.
+        This job is officially complete and closed.
+        """
+        send_alert(subject, msg, [complaint.contractor.user.email])
+
+    # --- 📧 EMAIL 3: TO OFFICER (Self-Confirmation) ---
+    if request.user.email:
+        subject = f"Case Closed: #{complaint.id}"
+        msg = f"""
+        You have successfully verified and closed the complaint:
+        "{complaint.title}"
+        
+        This case is now archived in your history.
+        """
+        send_alert(subject, msg, [request.user.email])
+
     messages.success(request, "Complaint closed successfully!")
     return redirect('officers:complaint_detail', complaint_id)
 
@@ -310,6 +392,21 @@ def contractor_approvals(request):
             contractor.approved_by = officer
             contractor.approved_at = timezone.now()
             contractor.save()
+
+            # --- 📧 EMAIL 1: WELCOME (Approved) ---
+            if contractor.user.email:
+                subject = "Application Approved - Welcome to UrbanWatch+"
+                msg = f"""
+                Hello {contractor.name},
+
+                Congratulations! Your application for '{contractor.company_name}' has been APPROVED.
+
+                You can now login to your dashboard to view available work orders in the {contractor.get_region_display()} region.
+
+                Welcome to the team!
+                """
+                send_alert(subject, msg, [contractor.user.email])
+
             messages.success(
                 request,
                 f"✓ Contractor {contractor.company_name} approved successfully."
@@ -323,6 +420,24 @@ def contractor_approvals(request):
             contractor.status = 'rejected'
             contractor.rejection_reason = reason
             contractor.save()
+
+            # --- 📧 EMAIL 2: REJECTION (With Reason) ---
+            if contractor.user.email:
+                subject = "Application Status Update"
+                msg = f"""
+                Hello {contractor.name},
+
+                We regret to inform you that your application for '{contractor.company_name}' has been REJECTED.
+
+                Reason for Rejection:
+                ---------------------
+                {reason}
+                ---------------------
+
+                If you wish to appeal or re-apply, please contact the administration.
+                """
+                send_alert(subject, msg, [contractor.user.email])
+
             messages.warning(
                 request,
                 f"✕ Contractor {contractor.company_name} rejected."
@@ -364,6 +479,28 @@ def reject_work(request, complaint_id):
         complaint.officer_feedback = reason  # renamed field
 
         complaint.save()
+        # --- 📧 EMAIL TO CONTRACTOR (Rejection Alert) ---
+        if complaint.contractor and complaint.contractor.user.email:
+            subject = f"ACTION REQUIRED: Work Rejected for '{complaint.title}'"
+            msg = f"""
+            Hello {complaint.contractor.name} from {complaint.contractor.company_name},
+            
+            Officer {officer.name} has reviewed your work for the complaint:
+            "{complaint.title}"
+            
+            Status: REJECTED (Sent back to In Progress)
+            
+            Reason for Rejection:
+            ---------------------
+            "{reason}"
+            ---------------------
+            
+            Action Required:
+            1. Fix the issues mentioned above.
+            2. Re-upload a new Proof of Work photo.
+            """
+            send_alert(subject, msg, [complaint.contractor.user.email])
+
         messages.warning(
             request,
             "Work rejected. Sent back to contractor for correction."

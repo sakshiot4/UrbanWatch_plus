@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
+from complaints.emails import send_alert
 from complaints.models import Complaint
 from .forms import ComplaintForm
 from django.contrib import messages
@@ -47,6 +48,33 @@ def submit_complaint(request): #this form allows citizens to submit complaints
             complaint.status = 'reported'   #set initial status.
             complaint.save() #save complaint to DB.
            
+
+            # --- 📧 NEW: SEND EMAIL TO CITIZEN ---
+            # --- 📧 DEBUG EMAIL BLOCK ---
+            print(f"--- ATTEMPTING EMAIL ---")
+            print(f"User Email: '{request.user.email}'") # Check if this is empty!
+            
+            if request.user.email:
+                subject = "Complaint Received"
+                message = f"""
+                Hello {request.user.first_name},
+
+                We have successfully received your complaint.
+                Tracking ID: {complaint.tracking_token}
+                
+                - UrbanWatch+ Team
+                """
+                
+                try:
+                    # CALLING SEND_ALERT
+                    print("Calling send_alert function...")
+                    send_alert(subject, message, [request.user.email])
+                    print("send_alert called successfully.")
+                except Exception as e:
+                    print(f"CRITICAL ERROR CALLING EMAIL: {e}")
+            else:
+                print("❌ SKIPPING EMAIL: User has no email address in database.")
+
             # Inside submit_complaint view, after complaint.save()
             messages.success(request, f'Complaint Submitted! Your Tracking ID is: {complaint.tracking_token}')
             print("✅ Form is valid! Redirecting...")
