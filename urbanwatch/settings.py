@@ -217,3 +217,8 @@ import cloudinary.api
 
 # Tell Django to use Cloudinary for uploaded media
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
+# Add this temporarily to see errors in the log
+import logging
+logging.getLogger('cloudinary').setLevel(logging.DEBUG)
