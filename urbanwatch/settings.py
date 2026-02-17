@@ -179,6 +179,13 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
+cloudinary.config( 
+  cloud_name = config('CLOUD_NAME', default=''), 
+  api_key = config('CLOUDINARY_API_KEY', default=''), 
+  api_secret = config('CLOUDINARY_API_SECRET', default=''),
+  secure = True
+)
+
 # Tell Django to use Cloudinary for uploaded media
 # Cloudinary Configuration
 CLOUDINARY_STORAGE = {
