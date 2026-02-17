@@ -48,7 +48,8 @@
                     {% else %}
                         <a href="{% url 'complaints:submit_complaint' %}" class="px-10 py-4 text-lg font-bold text-white transition duration-500 rounded-3xl shadow-xl bg-gradient-to-br from-purple-400 to-purple-800 hover:to-purple-900 hover:shadow-2xl hover:-translate-y-1 transform">
                             Report an Issue</a>
-                        <a href="{% url 'users:citizen_dashboard' %}" class="px-10 py-4 text-lg font-bold text-white transition duration-500 rounded-3xl shadow-xl bg-gradient-to-br from-purple-400 to-purple-800 hover:to-purple-900 hover:shadow-2xl hover:-translate-y-1 transform">Track My Complaints</a>
+                        <a href="{% url 'users:citizen_dashboard' %}" class="px-10 py-4 text-lg font-bold text-white transition duration-500 rounded-3xl shadow-xl bg-gradient-to-br from-purple-400 to-purple-800 hover:to-purple-900 hover:shadow-2xl hover:-translate-y-1 transform">
+                            Dashboard</a>
                     {% endif %}
                 {% else %}
                     <a href="{% url 'account_signup' %}" class="px-10 py-4 text-lg font-bold text-white transition duration-500 rounded-3xl shadow-xl bg-gradient-to-br from-purple-400 to-purple-800 hover:to-purple-900 hover:shadow-2xl hover:-translate-y-1 transform">

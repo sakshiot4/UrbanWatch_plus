@@ -10,5 +10,9 @@
             <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">📅</span>
             <span class="font-medium">{{ complaint.created_at|date:"M d, Y" }}</span>
         </div>
+        <div class="flex items-center gap-2 text-sm text-slate-600">
+            <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">📍</span>
+            <span class="font-medium capitalize">{{ complaint.region }}</span>
+        </div>
     </div>
 </div>

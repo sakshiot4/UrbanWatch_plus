@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,6 +16,7 @@ urlpatterns = [
     path('officers/', include('officers.urls')),
     path('contractors/', include('contractors.urls')),
     path('users/', include('users.urls')),
+    path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
 ]
 
 

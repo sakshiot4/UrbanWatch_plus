@@ -26,41 +26,34 @@
   </head>
 
   <body class="overflow-x-hidden font-sans text-slate-600 bg-gray-50 min-h-screen flex flex-col">
-
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity opacity-0"></div>
 
     <aside id="sidebar" class="fixed top-0 right-0 h-full w-80 glass-sidebar shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-l border-white/20">
       <div class="p-6 flex justify-between items-center border-b border-gray-200">
-        
-    <div class="ml-4">
-    <a href="{% url 'users:profile' %}" class="group relative flex items-center transition-all hover:opacity-90">
-        <div class="w-12 h-12 rounded-full border-2 border-purple-500 ring-2 ring-purple-100 overflow-hidden bg-white flex items-center justify-center shadow-sm">
-            
-            {% if user.officer_profile.profile_pic %}
+        <div class="ml-4">
+          <a href="{% url 'users:profile' %}" class="group relative flex items-center transition-all hover:opacity-90">
+            <div class="w-12 h-12 rounded-full border-2 border-purple-500 ring-2 ring-purple-100 overflow-hidden bg-white flex items-center justify-center shadow-sm">
+              {% if user.officer_profile.profile_pic %}
                 <img src="{{ user.officer_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
-            
-            {% elif user.contractor_profile.profile_pic %}
+              {% elif user.contractor_profile.profile_pic %}
                 <img src="{{ user.contractor_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
-            
-            {% elif user.citizen_profile.profile_pic %}
+              {% elif user.citizen_profile.profile_pic %}
                 <img src="{{ user.citizen_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
-            
-            {% else %}
+              {% else %}
                 <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-purple-900">
-                    <span class="text-sm font-black text-white uppercase">{{ user.username|first }}</span>
+                  <span class="text-sm font-black text-white uppercase">{{ user.username|first }}</span>
                 </div>
-            {% endif %}
-
+              {% endif %}
+            </div>
+          </a>
         </div>
-    </a>
-</div>
         <button onclick="toggleSidebar()" class="text-gray-500 hover:text-red-500 transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      
+
       <div class="p-6 overflow-y-auto grow space-y-8 -mt-6">
         <div>
           <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Citizen Access</h4>
@@ -69,7 +62,7 @@
               <a href="/" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Home</a>
             </li>
             <li>
-              <a href="#about" onclick="toggleSidebar()" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">About</a>
+              <a href="{% url 'about' %}" onclick="toggleSidebar()" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">About</a>
             </li>
             {% if user.is_authenticated %}
               <li>
@@ -112,31 +105,26 @@
               <li>
                 <a href="{% url 'account_logout' %}" class="text-lg font-medium text-gray-700 hover:text-purple-600 block">Logout</a>
               </li>
-              <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
+              <a href="{% url 'about' }" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
               <div class="flex items-center ml-4">
-                    <a href="{% url 'users:profile' %}" class="group relative flex items-center transition-all hover:opacity-90">
-                        <div class="w-10 h-10 rounded-full border-2 border-purple-500 ring-2 ring-purple-100 overflow-hidden bg-white flex items-center justify-center shadow-sm">
-                            
-                            {% if user.officer_profile.profile_pic %}
-                                <img src="{{ user.officer_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
-                            
-                            {% elif user.contractor_profile.profile_pic %}
-                                <img src="{{ user.contractor_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
-                            
-                            {% elif user.citizen_profile.profile_pic %}
-                                <img src="{{ user.citizen_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
-                            
-                            {% else %}
-                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-purple-900">
-                                    <span class="text-sm font-black text-white uppercase">{{ user.username|first }}</span>
-                                </div>
-                            {% endif %}
-
-                        </div>
-                    </a>
-                </div>
+                <a href="{% url 'users:profile' %}" class="group relative flex items-center transition-all hover:opacity-90">
+                  <div class="w-10 h-10 rounded-full border-2 border-purple-500 ring-2 ring-purple-100 overflow-hidden bg-white flex items-center justify-center shadow-sm">
+                    {% if user.officer_profile.profile_pic %}
+                      <img src="{{ user.officer_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+                    {% elif user.contractor_profile.profile_pic %}
+                      <img src="{{ user.contractor_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+                    {% elif user.citizen_profile.profile_pic %}
+                      <img src="{{ user.citizen_profile.profile_pic.url }}" class="w-full h-full aspect-square object-cover" />
+                    {% else %}
+                      <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-purple-900">
+                        <span class="text-sm font-black text-white uppercase">{{ user.username|first }}</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                </a>
+              </div>
             {% else %}
-              <a href="#about" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
+              <a href="{% url 'about' %}" class="text-gray-700 font-bold hover:text-purple-700 transition">About</a>
               <a href="{% url 'account_login' %}" class="text-gray-700 font-bold hover:text-purple-700 transition">Login</a>
               <a href="{% url 'account_signup' %}" class="px-6 py-2 bg-purple-700 text-white font-bold rounded-full shadow-lg hover:bg-purple-800 transition transform hover:-translate-y-0.5">Register</a>
             {% endif %}
@@ -156,11 +144,15 @@
             {% for message in messages %}
               <div class="p-4 mb-2 rounded-lg shadow-md {% if message.tags == 'error' %}
                   
+                  
                   bg-red-100 text-red-700
+
 
                 {% else %}
                   
+                  
                   bg-green-100 text-green-700
+
 
                 {% endif %}">{{ message }}</div>
             {% endfor %}

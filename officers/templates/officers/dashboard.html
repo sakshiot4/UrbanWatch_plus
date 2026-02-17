@@ -10,11 +10,7 @@
         
         <div class="relative max-w-7xl mx-auto z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="px-2 py-0.5 rounded bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm">
-                        Officer Console
-                    </span>
-                </div>
+                
                 <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">{{ officer.name }}</h1>
                 <p class="text-slate-400 text-sm mt-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -45,7 +41,7 @@
         {% endif %}
 
         <div class="px-4 sm:px-0 mb-8">
-            <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-2 flex overflow-x-auto gap-2 no-scrollbar">
+            <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-2 flex overflow-x-auto gap-2 no-scrollbar lg:mt-8 ">
                 
                 <button onclick="switchTab('take')" id="tab-btn-take" class="tab-btn whitespace-nowrap flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-bold transition-all text-slate-500 hover:bg-slate-50">
                     <div class="w-2 h-2 rounded-full bg-red-500 shrink-0"></div>
