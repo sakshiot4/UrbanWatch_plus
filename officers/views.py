@@ -45,7 +45,8 @@ def officer_dashboard(request):
         officer=officer, 
         status='completed'
     ).select_related('contractor').order_by('-completed_at')
-    p_verify = Paginator(verification_qs, 6)
+
+    p_verify = Paginator(verification_qs, 6) # Paginate the queryset with 6 items per page
     page_verify = request.GET.get('page_verify')
     verification_issues = p_verify.get_page(page_verify)
 
@@ -94,6 +95,7 @@ def assign_to_me(request, complaint_id):
     #Lock the row to prevent race conditions.
     complaint = Complaint.objects.select_for_update().get(id=complaint_id)
 
+    # Validate assignment rules
     if complaint.officer:
         messages.warning(request, "This complaint is already assigned to another officer.")
         return redirect('officers:dashboard')
@@ -105,7 +107,7 @@ def assign_to_me(request, complaint_id):
     complaint.officer = officer
     complaint.status = 'assigned'
 
-    if complaint.assigned_at is None:
+    if complaint.assigned_at is None: # Set assigned_at timestamp only if it's not already set (in case of re-assignment)
         complaint.assigned_at = timezone.now()
 
     complaint.save()

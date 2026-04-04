@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% comment %} {% block title %}
+  Edit Case #{{ complaint.id }}
+{% endblock %} {% endcomment %}
+
+{% block content %}
+  <div class="min-h-screen bg-slate-50 w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] -mt-8 -mb-8">
+    
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="relative pb-24 pt-10 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-r from-[#5a0f0f] via-[#7a1212] to-[#2b0a0a]">
+        
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-10 bg-white"></div>
+        </div>
+
+        <div class="relative max-w-5xl mx-auto text-white z-10">
+          <a href="{% url 'users:complaint_status_detail' complaint.id %}" class="text-white/70 hover:text-white text-sm font-bold gap-2 flex items-center">
+             &larr; Back to Case Details
+          </a>
+
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-end mt-6 gap-6">
+            <div>
+              <span class="text-xs font-mono uppercase tracking-widest bg-white/10 px-3 py-1 rounded border border-white/10">Editing Case</span>
+              {% comment %} <h1 class="text-3xl md:text-4xl font-black mt-3 tracking-tight">Case #{{ complaint.id }}</h1> {% endcomment %}
+            </div>
+
+            <div class="flex gap-3 w-full md:w-auto">
+              <a href="{% url 'users:complaint_status_detail' complaint.id %}" class="flex-1 text-center px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-bold transition">Cancel</a>
+              <button type="submit" class="flex-1 px-8 py-3  rounded-xl bg-white text-[#7a1212] font-black shadow-lg hover:scale-105 transition md:text-0.5">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative max-w-4xl mx-auto -mt-12 z-20 px-4 sm:px-6 mb-20">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+            
+            <div class="bg-slate-50 border-b border-slate-100 px-8 py-6">
+                <h3 class="font-black text-slate-800 text-xl tracking-tight">Update Incident Details</h3>
+                <p class="text-sm text-slate-500 mt-1">Make changes below. Your changes will be sent to the assigned officer.</p>
+            </div>
+
+            <div class="p-8">
+                <div class="space-y-6 
+                    [&>div>label]:font-bold [&>div>label]:text-slate-700 [&>div>label]:text-sm [&>div>label]:uppercase [&>div>label]:tracking-widest
+                    [&>div>input]:input [&>div>input]:input-bordered [&>div>input]:w-full [&>div>input]:bg-slate-50 [&>div>input]:mt-2 [&>div>input]:focus:border-[#7a1212] [&>div>input]:focus:ring-1 [&>div>input]:focus:ring-[#7a1212]
+                    [&>div>textarea]:textarea [&>div>textarea]:textarea-bordered [&>div>textarea]:w-full [&>div>textarea]:bg-slate-50 [&>div>textarea]:mt-2 [&>div>textarea]:focus:border-[#7a1212] [&>div>textarea]:focus:ring-1 [&>div>textarea]:focus:ring-[#7a1212]
+                    [&>div>select]:select [&>div>select]:select-bordered [&>div>select]:w-full [&>div>select]:bg-slate-50 [&>div>select]:mt-2">
+                    
+                    {{ form|crispy }}
+                
+                {% if complaint.proof_image %}
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Current Evidence</h4>
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-100 group">
+                        <img src="{{ complaint.proof_image.url }}" alt="Current Proof" loading="lazy" class="w-full max-h-[400px] object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                    </div>
+                </div>
+                {% endif %}
+                </div>
+                </div>
+            </div>
+            
+        </div>
+      </div>
+
+    </form>
+  </div>
+{% endblock %}

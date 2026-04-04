@@ -68,8 +68,13 @@ def citizen_dashboard(request):
 
     # 3. Get Counts for Badges
     # Result: {'reported': 5, 'closed': 12, ...}
-    db_counts = base_qs.values('status').annotate(count=Count('status'))
-    counts = {item['status']: item['count'] for item in db_counts}
+    counts = {
+        'reported': base_qs.filter(status='reported').count(),
+        'assigned': base_qs.filter(status='assigned').count(),
+        'in_progress': base_qs.filter(status='in_progress').count(),
+        'completed': base_qs.filter(status='completed').count(),
+        'closed': base_qs.filter(status='closed').count(),
+    }
 
     # --- 4. HANDLE TAB FILTERING ---
     # Get the active tab from the URL, default to 'reported' if nothing clicked
@@ -268,3 +273,45 @@ def profile(request):
     }
 
     return render(request, 'users/profile.html', context)
+
+
+# Put this import at the top of users/views.py
+from complaints.forms import ComplaintEditForm
+
+# Put this new view at the bottom of users/views.py
+@login_required
+def edit_complaint(request, complaint_id):
+    """Allow citizens to edit their complaint if it hasn't been assigned yet."""
+    
+    # 1. Get the citizen profile
+    try:
+        citizen = Citizen.objects.get(user=request.user)
+    except Citizen.DoesNotExist:
+        messages.error(request, "Citizen profile not found.")
+        return redirect('account_login')
+
+    # 2. Get the complaint and ensure it belongs to this citizen
+    complaint = get_object_or_404(Complaint, id=complaint_id, citizen=citizen)
+
+    # 3. Security Check: Only allow editing if status is 'reported'
+    if complaint.status != 'reported':
+        messages.error(request, "This complaint has already been assigned and cannot be edited.")
+        return redirect('users:complaint_status_detail', complaint_id=complaint.id)
+
+    # 4. Handle the form submission
+    if request.method == 'POST':
+        form = ComplaintEditForm(request.POST, request.FILES, instance=complaint)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your complaint was updated successfully!")
+            return redirect('users:complaint_status_detail', complaint_id=complaint.id)
+    else:
+        # Pre-fill the form with the existing complaint data
+        form = ComplaintEditForm(instance=complaint)
+
+    context = {
+        'form': form,
+        'complaint': complaint,
+        'edit_mode': True,  # This can be used in the template to adjust the UI if needed.
+    }
+    return render(request, 'users/edit_complaint.html', context)

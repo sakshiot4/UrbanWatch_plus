@@ -7,8 +7,8 @@ from complaints.models import Complaint
 from .forms import ComplaintForm
 from django.contrib import messages
 from users.models import Citizen
-
-from .utils import get_region_from_pincode #import the utility function
+#import the utility function to determine region from pincode and reduce redundancy in the view.
+from .utils import get_region_from_pincode # This will help us auto-fill the region field based on the pincode provided by the user.
 
 
 @login_required #a decorator to ensure only logged-in users can access
@@ -34,14 +34,15 @@ def submit_complaint(request): #this form allows citizens to submit complaints
             complaint.latitude = float(request.POST.get('latitude')) if request.POST.get('latitude') else None
             complaint.longitude = float(request.POST.get('longitude')) if request.POST.get('longitude') else None
 
-            complaint.pincode = request.POST.get('pincode')
+            complaint.pincode = request.POST.get('pincode') # Capture pincode from hidden input (if provided)
             complaint.location = request.POST.get('location') # This captures the full address
 
             # Auto-fill region based on pincode if provided
             pincode = request.POST.get('pincode') # We will send this from the frontend
-            if pincode:
+            if pincode: # If pincode is provided, use it to determine the region
                 complaint.pincode = pincode
-                complaint.region = get_region_from_pincode(pincode).lower()
+                # Use the utility function to get region from pincode and convert to lowercase
+                complaint.region = get_region_from_pincode(pincode).lower() 
             else:
                 complaint.region = 'central' #default region if no pincode
 

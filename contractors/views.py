@@ -163,7 +163,7 @@ def contractor_update_status(request, complaint_id):
 
             # Check if nothing changed (only if no image was uploaded)
             if new_status == current_status and not uploaded_image:
-                messages.info(request, "No status change detected.")
+                messages.info(request, "Upload the Proof of Work image to update status.")
                 return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
 
             # --- CASE 1: STARTING WORK (Assigned -> In Progress) ---
@@ -180,7 +180,7 @@ def contractor_update_status(request, complaint_id):
                 
                 # Validation: Image is mandatory for completion
                 has_image = uploaded_image or complaint.completion_image
-                if not has_image:
+                if not has_image: 
                     messages.error(request, "⚠️ You must upload a 'Proof of Work' image to mark this as Completed.")
                     return redirect('contractors:contractor_complaint_detail', complaint_id=complaint.id)
 

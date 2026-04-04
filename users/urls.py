@@ -8,4 +8,5 @@ urlpatterns = [
     path('dashboard/', views.citizen_dashboard, name='citizen_dashboard'),
     path('complaint/<int:complaint_id>/status/', views.complaint_status_detail, name='complaint_status_detail'),
     path('profile/', views.profile, name='profile'),
+    path('complaint/edit/<int:complaint_id>/', views.edit_complaint, name='edit_complaint'),
 ]

@@ -1,149 +1,168 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Case #{{ complaint.id }} - UrbanWatch+{% endblock %}
+{% block title %}
+  Case #{{ complaint.id }} - UrbanWatch+
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<div class="min-h-screen bg-slate-50 w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] -mt-8 -mb-8">
-
+  <div class="min-h-screen bg-slate-50 w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] -mt-8 -mb-8">
     <div class="relative pb-24 pt-10 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-r 
-        {% if complaint.status == 'reported' %} from-purple-900 via-indigo-900 to-slate-900
-        {% elif complaint.status == 'assigned' %} from-blue-900 via-indigo-900 to-slate-900
-        {% elif complaint.status == 'in_progress' %} from-amber-900 via-orange-900 to-slate-900
-        {% elif complaint.status == 'completed' %} from-emerald-900 via-teal-900 to-slate-900
-        {% else %} from-slate-800 via-gray-800 to-black {% endif %}">
-        
-        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-            <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-20 bg-white"></div>
-            <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-20 bg-white"></div>
-        </div>
+        {% if complaint.status == 'reported' %}
+         from-purple-900 via-indigo-900 to-slate-900
+          {% elif complaint.status == 'assigned' %}        
+            from-blue-900 via-indigo-900 to-slate-900
+          {% elif complaint.status == 'in_progress' %}
+            from-amber-900 via-orange-900 to-slate-900
+          {% elif complaint.status == 'completed' %}
+            from-emerald-900 via-teal-900 to-slate-900
+          {% else %}
+            from-slate-800 via-gray-800 to-black
+          {% endif %}">
+      <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-20 bg-white"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-20 bg-white"></div>
+      </div>
 
-        <div class="relative max-w-7xl mx-auto z-10">
-            <a href="{% url 'users:citizen_dashboard' %}" class="inline-flex items-center text-white/70 hover:text-white transition-colors mb-6 text-sm font-bold gap-2">
-                &larr; Back to Dashboard
-            </a>
+      <div class="relative max-w-7xl mx-auto z-10">
+        <a href="{% url 'users:citizen_dashboard' %}" class="inline-flex items-center text-white/70 hover:text-white transition-colors mb-6 text-sm font-bold gap-2">&larr; Back to Dashboard</a>
 
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                <div>
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-white text-[10px] font-mono uppercase tracking-widest">Case File</span>
-                        <span class="text-white/60 font-mono text-sm">#{{ complaint.id }}</span>
-                    </div>
-                    <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">{{ complaint.title }}</h1>
-                </div>
-
-                <div class="flex flex-col items-end">
-                    <span class="text-xs font-bold text-white/70 uppercase tracking-widest mb-1">Current Status</span>
-                    <span class="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide border shadow-lg backdrop-blur-md flex items-center gap-2 bg-white/20 border-white/20 text-white">
-                        {{ complaint.get_status_display }}
-                    </span>
-                </div>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-white text-[10px] font-mono uppercase tracking-widest">Case File</span>
+              <span class="text-white/60 font-mono text-sm">#{{ complaint.id }}</span>
             </div>
+            <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">{{ complaint.title }}</h1>
+          </div>
+
+          <div class="flex flex-col items-end text-right w-full md:w-auto mt-4 md:mt-0">
+              <span class="text-xs font-bold text-white/70 uppercase tracking-widest mb-2">Current Status</span>
+    
+              <div class="flex items-center justify-end gap-3 w-full">
+                  
+                  {% if complaint.status == 'reported' %}
+                      <a href="{% url 'users:edit_complaint' complaint.id %}" class="px-4 py-2 flex items-center bg-white/10 hover:bg-white text-white hover:text-[#7a1212] transition-colors shadow-lg rounded-lg border border-white/20 backdrop-blur-md font-bold text-sm shrink-0">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                          Edit
+                      </a>
+                  {% endif %}
+
+                  <span class="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide border shadow-lg backdrop-blur-md bg-white/20 border-white/20 text-white shrink-0">
+                      {{ complaint.get_status_display }}
+                  </span>
+                  
+              </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="relative max-w-7xl mx-auto -mt-16 z-20">
-        
-        <div class="hidden lg:grid grid-cols-3 gap-8 px-8">
-            <div class="col-span-2 space-y-8">
-                {% include "complaints/includes/card_description.html" %}
-                {% include "complaints/includes/card_evidence.html" %}
-                
-                <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                    <div class="bg-slate-50 border-b border-slate-100 px-6 py-4"><h3 class="font-bold text-slate-800">Location</h3></div>
-                    <div class="relative">
-                         <div id="detail-map-desktop" class="h-64 w-full z-0"></div>
-                         <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-lg text-xs z-[400]">
-                            <p class="font-bold text-slate-700">{{ complaint.location|default:"Address unavailable" }}</p>
-                         </div>
-                    </div>
-                </div>
+      <div class="hidden lg:grid grid-cols-3 gap-8 px-8">
+        <div class="col-span-2 space-y-8">
+          {% include 'complaints/includes/card_description.html' %}
+          {% include 'complaints/includes/card_evidence.html' %}
+
+          <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-100 px-6 py-4">
+              <h3 class="font-bold text-slate-800">Location</h3>
             </div>
-            
-            <div class="space-y-8">
-                {% include "complaints/includes/card_team.html" %}
-                {% include "complaints/includes/card_timeline.html" %}
-                {% include "complaints/includes/card_token.html" %}
+            <div class="relative">
+              <div id="detail-map-desktop" class="h-64 w-full z-0"></div>
+              <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-lg text-xs z-[400]">
+                <p class="font-bold text-slate-700">{{ complaint.location|default:'Address unavailable' }}</p>
+              </div>
             </div>
+          </div>
         </div>
 
-        <div class="lg:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 px-4 pb-8 scrollbar-hide">
-            
-            <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
-                {% include "complaints/includes/card_description.html" %}
-                {% include "complaints/includes/card_team.html" %}
-                <div class="text-center text-xs text-slate-400 font-mono animate-pulse">Swipe for Evidence &rarr;</div>
-            </div>
+        <div class="space-y-8">
+          {% include 'complaints/includes/card_team.html' %}
+          {% include 'complaints/includes/card_timeline.html' %}
+          {% include 'complaints/includes/card_token.html' %}
+        </div>
+      </div>
 
-            <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
-                {% include "complaints/includes/card_evidence.html" %}
-                
-                <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                    <div class="bg-slate-50 border-b border-slate-100 px-6 py-4"><h3 class="font-bold text-slate-800">Location</h3></div>
-                    <div class="relative">
-                         <div id="detail-map-mobile" class="h-64 w-full z-0 bg-slate-100"></div>
-                         <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-lg text-xs z-[400]">
-                            <p class="font-bold text-slate-700">{{ complaint.location|default:"Address unavailable" }}</p>
-                         </div>
-                    </div>
-                </div>
-                <div class="text-center text-xs text-slate-400 font-mono animate-pulse">Swipe for History &rarr;</div>
-            </div>
-
-            <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
-                {% include "complaints/includes/card_timeline.html" %}
-                {% include "complaints/includes/card_token.html" %}
-            </div>
-
+      <div class="lg:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 px-4 pb-8 scrollbar-hide">
+        <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
+          {% include 'complaints/includes/card_description.html' %}
+          {% include 'complaints/includes/card_team.html' %}
+          <div class="text-center text-xs text-slate-400 font-mono animate-pulse">Swipe for Evidence &rarr;</div>
         </div>
 
+        <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
+          {% include 'complaints/includes/card_evidence.html' %}
+
+          <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-100 px-6 py-4">
+              <h3 class="font-bold text-slate-800">Location</h3>
+            </div>
+            <div class="relative">
+              <div id="detail-map-mobile" class="h-64 w-full z-0 bg-slate-100"></div>
+              <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 shadow-lg text-xs z-[400]">
+                <p class="font-bold text-slate-700">{{ complaint.location|default:'Address unavailable' }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="text-center text-xs text-slate-400 font-mono animate-pulse">Swipe for History &rarr;</div>
+        </div>
+
+        <div class="flex-shrink-0 w-[90vw] snap-center space-y-4">
+          {% include 'complaints/includes/card_timeline.html' %}
+          {% include 'complaints/includes/card_token.html' %}
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var lat = "{{ complaint.latitude|default:'null' }}";
-        var lng = "{{ complaint.longitude|default:'null' }}";
-        var hasCoords = (lat !== 'null' && lng !== 'null');
-
-        if (hasCoords) {
-            
-            // 1. Initialize Desktop Map (If visible)
-            var desktopEl = document.getElementById('detail-map-desktop');
-            if (desktopEl) {
-                var mapD = L.map('detail-map-desktop', {zoomControl: false}).setView([lat, lng], 15);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapD);
-                L.marker([lat, lng]).addTo(mapD).bindPopup("<b>Incident</b>");
-            }
-
-            // 2. Initialize Mobile Map (Always)
-            // Since we use CSS Scroll, this div is technically "visible" to the browser, just off-screen.
-            // Leaflet should handle this much better than Swiper.
-            var mobileEl = document.getElementById('detail-map-mobile');
-            if (mobileEl) {
-                var mapM = L.map('detail-map-mobile', {zoomControl: false}).setView([lat, lng], 15);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapM);
-                L.marker([lat, lng]).addTo(mapM).bindPopup("<b>Incident</b>");
-                
-                // Extra safety: Fix gray map if it initializes while scrolling
-                setTimeout(function(){ mapM.invalidateSize(); }, 1000);
-            }
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var lat = "{{ complaint.latitude|default:'null' }}"
+      var lng = "{{ complaint.longitude|default:'null' }}"
+      var hasCoords = lat !== 'null' && lng !== 'null'
+    
+      if (hasCoords) {
+        // 1. Initialize Desktop Map (If visible)
+        var desktopEl = document.getElementById('detail-map-desktop')
+        if (desktopEl) {
+          var mapD = L.map('detail-map-desktop', { zoomControl: false }).setView([lat, lng], 15)
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapD)
+          L.marker([lat, lng]).addTo(mapD).bindPopup('<b>Incident</b>')
         }
-    });
-</script>
+    
+        // 2. Initialize Mobile Map (Always)
+        // Since we use CSS Scroll, this div is technically "visible" to the browser, just off-screen.
+        // Leaflet should handle this much better than Swiper.
+        var mobileEl = document.getElementById('detail-map-mobile')
+        if (mobileEl) {
+          var mapM = L.map('detail-map-mobile', { zoomControl: false }).setView([lat, lng], 15)
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapM)
+          L.marker([lat, lng]).addTo(mapM).bindPopup('<b>Incident</b>')
+    
+          // Extra safety: Fix gray map if it initializes while scrolling
+          setTimeout(function () {
+            mapM.invalidateSize()
+          }, 1000)
+        }
+      }
+    })
+  </script>
 
-<style>
+  <style>
     /* Hide Scrollbar but allow scrolling */
     .scrollbar-hide::-webkit-scrollbar {
-        display: none;
+      display: none;
     }
     .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
-</style>
+  </style>
 {% endblock %}

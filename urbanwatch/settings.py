@@ -106,6 +106,8 @@ WSGI_APPLICATION = 'urbanwatch.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+
 DATABASES = {
     'default': dj_database_url.config(
         # Use SQLite locally (if no DATABASE_URL is found)
@@ -173,7 +175,7 @@ CRISPY_TEMPLATE_PACK = "tailwind"
 
 #media files settings.
 #DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-if DEBUG:
+"""if DEBUG:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / "media"
 
@@ -185,7 +187,21 @@ else:
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
-    }
+    }"""
+
+# Keep these for local reference
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
+
+# This forces Django to use Cloudinary for ALL environments (Local + Render)
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 import cloudinary
 import cloudinary.uploader
